@@ -1,6 +1,8 @@
- "use client"
+// src/components/AlphaForge.tsx
+"use client"
 
 import { useState } from "react"
+import forgeBg from "@/assets/100993-657759886_medium.mp4"
 
 type PlanId = "single" | "legion"
 
@@ -57,6 +59,20 @@ export default function AlphaForge() {
 
   return (
     <section id="forge" className="relative z-10 px-4 py-24">
+      {/* Fondo de forja con video */}
+      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <video
+          className="h-full w-full object-cover opacity-28"
+          autoPlay
+          muted
+          loop
+          playsInline
+        >
+          <source src={forgeBg} type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/80 to-black/95" />
+      </div>
+
       <div className="mx-auto max-w-6xl">
         {/* HEADER MÓDULO ALPHA */}
         <header className="mb-10">

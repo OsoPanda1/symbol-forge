@@ -1,8 +1,25 @@
+// src/components/Hero.tsx
+import heroBg from "@/assets/100493-656497720_medium.mp4"
+
 type Props = { onStartFree: () => void; onStartAlpha: () => void }
 
 export default function Hero({ onStartFree, onStartAlpha }: Props) {
   return (
     <section className="relative z-10 px-4 pt-20 pb-24 md:pt-28 md:pb-32">
+      {/* Capa de video específica del Hero (brecha principal) */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] overflow-hidden md:h-[520px] lg:h-[560px]">
+        <video
+          className="h-full w-full object-cover opacity-45"
+          autoPlay
+          muted
+          loop
+          playsInline
+        >
+          <source src={heroBg} type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/85 via-black/75 to-black/0" />
+      </div>
+
       <div className="mx-auto flex max-w-6xl flex-col gap-10 md:flex-row md:items-start">
         {/* COLUMNA IZQUIERDA: TITULAR + CTA */}
         <div className="relative flex-1">

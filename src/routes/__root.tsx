@@ -1,4 +1,5 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+// src/routes/__root.tsx
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import {
   Outlet,
   Link,
@@ -6,9 +7,10 @@ import {
   useRouter,
   HeadContent,
   Scripts,
-} from "@tanstack/react-router";
+} from "@tanstack/react-router"
 
-import appCss from "../styles.css?url";
+import appCss from "../styles.css?url"
+import shellBg from "@/assets/96756-657131767.mp4"
 
 function NotFoundComponent() {
   return (
@@ -29,12 +31,12 @@ function NotFoundComponent() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
-  const router = useRouter();
+  console.error(error)
+  const router = useRouter()
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -48,8 +50,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
-              router.invalidate();
-              reset();
+              router.invalidate()
+              reset()
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
@@ -64,7 +66,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -72,14 +74,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Symbol Forge · The Alpha Red Hat" },
+      {
+        name: "description",
+        content:
+          "Zona de hackeo simbólico · Legiones de una leyenda urbana latinoamericana · Forja de símbolos Alpha.",
+      },
+      { name: "author", content: "The Alpha Red Hat · Anubis Villaseñor" },
+      { property: "og:title", content: "Symbol Forge · The Alpha Red Hat" },
+      {
+        property: "og:description",
+        content:
+          "Generador Aesthetics y forja Alpha de símbolos de resistencia · TAMV Online Network.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:site", content: "@TAMV_Online" },
     ],
     links: [
       {
@@ -92,28 +102,43 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
-});
+})
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <HeadContent />
       </head>
-      <body>
-        {children}
-        <Scripts />
+      <body className="bg-background text-foreground">
+        {/* Capa de video global: centro de monitoreo de la red */}
+        <video
+          className="fixed inset-0 h-full w-full object-cover opacity-20 pointer-events-none"
+          autoPlay
+          muted
+          loop
+          playsInline
+        >
+          <source src={shellBg} type="video/mp4" />
+        </video>
+        <div className="fixed inset-0 bg-black/70 pointer-events-none" />
+
+        {/* Capa de aplicación */}
+        <div className="relative z-10 min-h-screen">
+          {children}
+          <Scripts />
+        </div>
       </body>
     </html>
-  );
+  )
 }
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext();
+  const { queryClient } = Route.useRouteContext()
 
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
     </QueryClientProvider>
-  );
+  )
 }

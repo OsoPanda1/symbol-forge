@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-const CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789⸸⛧⟁ϞϟᛉᚱᚦϴΩ";
+const CHARS = "A̵̢̡͙͓̥̣̩̋̔͒̏́̏̀l̷̹͕̻̞͚̀̓ͅf̶̔͂̀̓̈́̉̂̾̚ aire ̝̹e̵̡̖͖̥͙̗̙̬͌̓̎͛̃̀ͅd̴̨̰̱̈́̃Ḩ̵͙̻̹͗̉̅͗̑ enA̵̢̡͙͓̥̣̩̋̔͒̏́̏̀l̷̹͕̻̞͚̀̓ͅf̶̔͂̀̓̈́̉̂̾̚ aire ̝̹e̵̡̖͖̥͙̗̙̬͌̓̎͛̃̀ͅd̴̨̰̱̈́̃Ḩ̵͙̻̹͗̉̅͗̑ enA̵̢̡͙͓̥̣̩̋̔͒̏́̏̀l̷̹͕̻̞͚̀̓ͅf̶̔͂̀̓̈́̉̂̾̚ aire ̝̹e̵̡̖͖̥͙̗̙̬͌̓̎͛̃̀ͅd̴̨̰̱̈́̃Ḩ̵͙̻̹͗̉̅͗̑ en";
 
 export default function MatrixRain() {
   const containerRef = useRef<HTMLDivElement>(null);

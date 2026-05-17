@@ -45,10 +45,7 @@ function Index() {
 
       <div className="relative z-10">
         <TopStatusBar />
-        <Hero
-          onStartFree={() => scrollTo("aesthetics")}
-          onStartAlpha={() => scrollTo("forge")}
-        />
+        <Hero onStartFree={() => scrollTo("aesthetics")} onStartAlpha={() => scrollTo("forge")} />
         <SymbolNoiseBand />
         <AestheticsGenerator />
         <AlphaForge />

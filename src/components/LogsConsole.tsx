@@ -44,8 +44,8 @@ export default function LogsConsole() {
                   l.c === "blood"
                     ? "text-blood-glow"
                     : l.c === "terminal"
-                    ? "text-terminal"
-                    : "text-ash"
+                      ? "text-terminal"
+                      : "text-ash"
                 }
               >
                 [{l.t}]

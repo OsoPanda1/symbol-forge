@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import dynamic from "next/dynamic"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import dynamic from "next/dynamic";
+import { cn } from "@/lib/utils";
 
 // Import dinámico del globo (evita SSR issues)
-const Globe = dynamic(() => import("./AlphaGlobe"), { ssr: false })
+const Globe = dynamic(() => import("./AlphaGlobe"), { ssr: false });
 
 type Props = React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
-  maxChars?: number
-}
+  maxChars?: number;
+};
 
 type Alert = {
-  id: number
-  level: "INFO" | "WARN" | "CRIT"
-  message: string
-}
+  id: number;
+  level: "INFO" | "WARN" | "CRIT";
+  message: string;
+};
 
 const ALERT_POOL: Alert[] = [
   {
@@ -43,43 +43,43 @@ const ALERT_POOL: Alert[] = [
     level: "WARN",
     message: "Actividad inusual en región EU-West · bots corporativos escaneando superficie.",
   },
-]
+];
 
 export function AlphaMonitorConsole({ maxChars = 280, className, ...props }: Props) {
-  const [value, setValue] = React.useState(props.value?.toString() ?? "")
-  const [alerts, setAlerts] = React.useState<Alert[]>([])
-  const [alertTick, setAlertTick] = React.useState(0)
+  const [value, setValue] = React.useState(props.value?.toString() ?? "");
+  const [alerts, setAlerts] = React.useState<Alert[]>([]);
+  const [alertTick, setAlertTick] = React.useState(0);
 
-  const length = value.length
-  const overLimit = length > maxChars
+  const length = value.length;
+  const overLimit = length > maxChars;
 
   // Rotación de alertas tipo NOC
   React.useEffect(() => {
     const id = window.setInterval(() => {
-      setAlertTick((t) => t + 1)
+      setAlertTick((t) => t + 1);
       setAlerts((prev) => {
-        const pool = ALERT_POOL
-        const next = pool[Math.floor(Math.random() * pool.length)]
-        const withNew = [...prev.filter((a) => a.id !== next.id), next]
-        return withNew.slice(-3) // máximo 3 banners visibles
-      })
-    }, 5000)
-    return () => window.clearInterval(id)
-  }, [])
+        const pool = ALERT_POOL;
+        const next = pool[Math.floor(Math.random() * pool.length)];
+        const withNew = [...prev.filter((a) => a.id !== next.id), next];
+        return withNew.slice(-3); // máximo 3 banners visibles
+      });
+    }, 5000);
+    return () => window.clearInterval(id);
+  }, []);
 
   // Sincronizar value externo
   React.useEffect(() => {
     if (props.value !== undefined) {
-      setValue(props.value.toString())
+      setValue(props.value.toString());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.value])
+  }, [props.value]);
 
   const badgeForLevel = (level: Alert["level"]) => {
-    if (level === "CRIT") return "bg-blood text-bone border-blood-glow"
-    if (level === "WARN") return "bg-acid/20 text-acid border-acid/60"
-    return "bg-terminal/10 text-terminal border-terminal/60"
-  }
+    if (level === "CRIT") return "bg-blood text-bone border-blood-glow";
+    if (level === "WARN") return "bg-acid/20 text-acid border-acid/60";
+    return "bg-terminal/10 text-terminal border-terminal/60";
+  };
 
   return (
     <div className="panel grid gap-6 p-4 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] md:p-6">
@@ -104,8 +104,8 @@ export function AlphaMonitorConsole({ maxChars = 280, className, ...props }: Pro
             {...props}
             value={value}
             onChange={(e) => {
-              setValue(e.target.value)
-              props.onChange?.(e)
+              setValue(e.target.value);
+              props.onChange?.(e);
             }}
             className={cn(
               "flex min-h-[140px] w-full rounded-none border border-input bg-black/60 px-3 py-2",
@@ -169,9 +169,7 @@ export function AlphaMonitorConsole({ maxChars = 280, className, ...props }: Pro
                 <span className="inline-flex items-center justify-center rounded-full border px-1.5 py-0.5 text-[9px]">
                   {a.level === "CRIT" ? "alerta_crítica" : a.level === "WARN" ? "alerta" : "log"}
                 </span>
-                <span className="line-clamp-2 normal-case text-[10px]">
-                  {a.message}
-                </span>
+                <span className="line-clamp-2 normal-case text-[10px]">{a.message}</span>
               </div>
               {/* barra inferior de progreso visual (fake) */}
               <span className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-blood via-terminal to-blood/40" />
@@ -180,5 +178,5 @@ export function AlphaMonitorConsole({ maxChars = 280, className, ...props }: Pro
         </div>
       </div>
     </div>
-  )
+  );
 }

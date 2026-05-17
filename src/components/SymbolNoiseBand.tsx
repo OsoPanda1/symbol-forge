@@ -1,6 +1,15 @@
-const NOISE = "⧉⧉⧉ ⟟⟟⟟ ϞϞϞ 𓂀𓂀 ⦿⦿⦿ ᛉᛉᛉ ☰☲☷☵☳ ⋇⋇⋇ ⸸⸸⸸ ⛧⛧⛧ ⟁⟁⟁ ᚱᚦᛟ ▰▰▰ ◢◤◣◥ ░▒▓█ ϴΩΨΣ ⨂⨁⨀ ⊹⊹⊹ ✶✶✶ ☍☌☋ ⟁⟁⟁ ⸸⛧⸸";
+const NOISE =
+  "⧉⧉⧉ ⟟⟟⟟ ϞϞϞ 𓂀𓂀 ⦿⦿⦿ ᛉᛉᛉ ☰☲☷☵☳ ⋇⋇⋇ ⸸⸸⸸ ⛧⛧⛧ ⟁⟁⟁ ᚱᚦᛟ ▰▰▰ ◢◤◣◥ ░▒▓█ ϴΩΨΣ ⨂⨁⨀ ⊹⊹⊹ ✶✶✶ ☍☌☋ ⟁⟁⟁ ⸸⛧⸸";
 const MSG = "[ZONA DE HACKEO SIMBÓLICO]";
-const STR = (NOISE + " " + MSG + " " + NOISE + " [NO_INDEXADO_POR_MOTORES_DEL_STATUS_QUO] " + NOISE).repeat(3);
+const STR = (
+  NOISE +
+  " " +
+  MSG +
+  " " +
+  NOISE +
+  " [NO_INDEXADO_POR_MOTORES_DEL_STATUS_QUO] " +
+  NOISE
+).repeat(3);
 
 export default function SymbolNoiseBand() {
   return (

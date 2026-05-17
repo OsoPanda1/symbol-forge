@@ -1,30 +1,31 @@
 // src/components/AestheticsGenerator.tsx
-"use client"
+"use client";
 
-import { useMemo, useState } from "react"
-import { generateAll } from "@/lib/aesthetics"
-import aestheticsBg from "@/assets/246877_medium.mp4"
+import { useMemo, useState } from "react";
+import { generateAll } from "@/lib/aesthetics";
+import OptimizedVideo from "@/components/OptimizedVideo";
+import aestheticsBg from "@/assets/246877_medium.mp4";
 
 type Props = {
-  initialText?: string
-}
+  initialText?: string;
+};
 
 export default function AestheticsGenerator({ initialText = "anubis villaseñor" }: Props) {
-  const [text, setText] = useState(initialText)
-  const [copied, setCopied] = useState<string | null>(null)
+  const [text, setText] = useState(initialText);
+  const [copied, setCopied] = useState<string | null>(null);
 
-  const results = useMemo(() => generateAll(text), [text])
+  const results = useMemo(() => generateAll(text), [text]);
 
   const copy = async (out: string, id: string) => {
-    if (!out) return
+    if (!out) return;
     try {
-      await navigator.clipboard.writeText(out)
-      setCopied(id)
-      setTimeout(() => setCopied(null), 900)
+      await navigator.clipboard.writeText(out);
+      setCopied(id);
+      setTimeout(() => setCopied(null), 900);
     } catch {
       // opcional: log local
     }
-  }
+  };
 
   return (
     <section id="aesthetics" className="relative z-10 px-4 py-20">
@@ -52,16 +53,14 @@ export default function AestheticsGenerator({ initialText = "anubis villaseñor"
           <p className="mt-3 max-w-2xl font-mono text-sm text-muted-foreground md:text-base">
             Este es tu laboratorio libre. Escribe cualquier cosa y el núcleo estético de TAMV
             generará{" "}
-            <span className="text-bone">
-              {results.length || 18} variaciones listas para copiar
-            </span>{" "}
+            <span className="text-bone">{results.length || 18} variaciones listas para copiar</span>{" "}
             sin hablar con ningún servidor externo. 100% en cliente, cero nubes corporativas, cero
             cookies de rastreo.
           </p>
 
           <p className="mt-2 max-w-2xl font-mono text-[11px] text-ash">
-            &gt; Todo lo que forjes aquí es público. El modo ALPHA es donde los símbolos dejan de ser
-            sandbox y pasan a ser estandartes.
+            &gt; Todo lo que forjes aquí es público. El modo ALPHA es donde los símbolos dejan de
+            ser sandbox y pasan a ser estandartes.
           </p>
         </header>
 
@@ -69,16 +68,12 @@ export default function AestheticsGenerator({ initialText = "anubis villaseñor"
         <div className="grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)]">
           {/* Panel de entrada con video de fondo */}
           <div className="panel relative overflow-hidden p-4 md:p-6">
-            <video
-              className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-25"
-              autoPlay
-              muted
-              loop
-              playsInline
-            >
-              <source src={aestheticsBg} type="video/mp4" />
-            </video>
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90" />
+            <OptimizedVideo
+              src={aestheticsBg}
+              wrapperClassName="pointer-events-none absolute inset-0"
+              className="h-full w-full object-cover opacity-25"
+              overlayClassName="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90"
+            />
 
             <div className="relative">
               <div className="flex items-center justify-between">
@@ -204,5 +199,5 @@ export default function AestheticsGenerator({ initialText = "anubis villaseñor"
         </div>
       </div>
     </section>
-  )
+  );
 }

@@ -15,10 +15,12 @@ const U = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const D = "0123456789";
 
 const apply = (text: string, ...maps: CharMap[]) =>
-  [...text].map((c) => {
-    for (const m of maps) if (m[c]) return m[c];
-    return c;
-  }).join("");
+  [...text]
+    .map((c) => {
+      for (const m of maps) if (m[c]) return m[c];
+      return c;
+    })
+    .join("");
 
 const fraktur = buildMap(A, "𝔞𝔟𝔠𝔡𝔢𝔣𝔤𝔥𝔦𝔧𝔨𝔩𝔪𝔫𝔬𝔭𝔮𝔯𝔰𝔱𝔲𝔳𝔴𝔵𝔶𝔷");
 const frakturU = buildMap(U, "𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ");
@@ -43,14 +45,35 @@ const smallCaps = buildMap(A, "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀs�
 const superscript = buildMap(A, "ᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖᵠʳˢᵗᵘᵛʷˣʸᶻ");
 const subscript = buildMap(A, "ₐᵦ𝒸𝒹ₑ𝒻𝓰ₕᵢⱼₖₗₘₙₒₚ𝓆ᵣₛₜᵤᵥ𝓌ₓᵧ𝓏");
 const cursed = (t: string) => {
-  const marks = ["\u0300", "\u0301", "\u0302", "\u0303", "\u0304", "\u0306", "\u0307", "\u0308", "\u030A", "\u030B", "\u030C", "\u0327", "\u0328", "\u0334", "\u0335", "\u0336", "\u0337", "\u0338"];
-  return [...t].map((c) => {
-    if (c === " ") return c;
-    let out = c;
-    const n = 3 + Math.floor(Math.random() * 5);
-    for (let i = 0; i < n; i++) out += marks[Math.floor(Math.random() * marks.length)];
-    return out;
-  }).join("");
+  const marks = [
+    "\u0300",
+    "\u0301",
+    "\u0302",
+    "\u0303",
+    "\u0304",
+    "\u0306",
+    "\u0307",
+    "\u0308",
+    "\u030A",
+    "\u030B",
+    "\u030C",
+    "\u0327",
+    "\u0328",
+    "\u0334",
+    "\u0335",
+    "\u0336",
+    "\u0337",
+    "\u0338",
+  ];
+  return [...t]
+    .map((c) => {
+      if (c === " ") return c;
+      let out = c;
+      const n = 3 + Math.floor(Math.random() * 5);
+      for (let i = 0; i < n; i++) out += marks[Math.floor(Math.random() * marks.length)];
+      return out;
+    })
+    .join("");
 };
 
 const wrap = (t: string, l: string, r: string, sep = " ") => `${l}${sep}${t}${sep}${r}`;
@@ -63,42 +86,110 @@ export type Style = {
 };
 
 export const STYLES: Style[] = [
-  { id: "fraktur-bold", label: "Fraktur Sangre", tag: "GOTHIC.BOLD",
-    transform: (t) => wrap(apply(t, frakturBU, frakturB), "⸸", "⸸") },
-  { id: "fraktur", label: "Fraktur Ritual", tag: "GOTHIC.LIGHT",
-    transform: (t) => apply(t, frakturU, fraktur) },
-  { id: "double", label: "Hueco Cuántico", tag: "VOID.DOUBLE",
-    transform: (t) => apply(t, dblU, dbl, dblD) },
-  { id: "mono", label: "Consola Forense", tag: "TERMINAL.MONO",
-    transform: (t) => `> ${apply(t, monoU, mono, monoD)} _` },
-  { id: "bold", label: "Acero Tipográfico", tag: "WEIGHT.HEAVY",
-    transform: (t) => apply(t, boldU, bold, boldD) },
-  { id: "italic", label: "Susurro Inclinado", tag: "SLANT.ITAL",
-    transform: (t) => apply(t, italicU, italic) },
-  { id: "bold-italic", label: "Lengua de Fuego", tag: "BOLD.ITAL",
-    transform: (t) => apply(t, boldItalicU, boldItalic) },
-  { id: "script", label: "Códice Manuscrito", tag: "SCRIPT.CURSIVE",
-    transform: (t) => apply(t, scriptU, script) },
-  { id: "small-caps", label: "Versales Espías", tag: "CAPS.MICRO",
-    transform: (t) => apply(t.toLowerCase(), smallCaps) },
-  { id: "supersub", label: "Órbita Superior", tag: "RAISE.SUP",
-    transform: (t) => apply(t.toLowerCase(), superscript) },
-  { id: "subscript", label: "Subterráneo", tag: "DROP.SUB",
-    transform: (t) => apply(t.toLowerCase(), subscript) },
-  { id: "cursed", label: "Texto Maldito", tag: "ZALGO.CURSED",
-    transform: (t) => cursed(t) },
-  { id: "runes", label: "Sigilo Rúnico", tag: "GLYPH.RUNIC",
-    transform: (t) => `ᚱ ${apply(t, boldU, bold).split("").join("·")} ᚱ` },
-  { id: "tribal", label: "Brasa Tribal", tag: "FLAME.TRIBAL",
-    transform: (t) => `▰▰▰ ${apply(t, frakturBU, frakturB)} ▰▰▰` },
-  { id: "hacker", label: "Modo Hacker", tag: "L33T.HACK",
-    transform: (t) => `[ ${t.toUpperCase().replace(/A/g, "4").replace(/E/g, "3").replace(/I/g, "1").replace(/O/g, "0").replace(/S/g, "5").replace(/T/g, "7")} ]` },
-  { id: "occult", label: "Sello Ocultista", tag: "SEAL.OCCULT",
-    transform: (t) => `𓂀 ${apply(t, frakturBU, frakturB)} 𓂀` },
-  { id: "deepweb", label: "Firma Deep Web", tag: "DARKNET.SIG",
-    transform: (t) => `⟁⟁⟁ ${apply(t, monoU, mono)} ⟁⟁⟁` },
-  { id: "legion", label: "Estandarte Legión", tag: "LEGION.BANNER",
-    transform: (t) => `⸸⛧⸸ ${apply(t, frakturBU, frakturB)} ⸸⛧⸸` },
+  {
+    id: "fraktur-bold",
+    label: "Fraktur Sangre",
+    tag: "GOTHIC.BOLD",
+    transform: (t) => wrap(apply(t, frakturBU, frakturB), "⸸", "⸸"),
+  },
+  {
+    id: "fraktur",
+    label: "Fraktur Ritual",
+    tag: "GOTHIC.LIGHT",
+    transform: (t) => apply(t, frakturU, fraktur),
+  },
+  {
+    id: "double",
+    label: "Hueco Cuántico",
+    tag: "VOID.DOUBLE",
+    transform: (t) => apply(t, dblU, dbl, dblD),
+  },
+  {
+    id: "mono",
+    label: "Consola Forense",
+    tag: "TERMINAL.MONO",
+    transform: (t) => `> ${apply(t, monoU, mono, monoD)} _`,
+  },
+  {
+    id: "bold",
+    label: "Acero Tipográfico",
+    tag: "WEIGHT.HEAVY",
+    transform: (t) => apply(t, boldU, bold, boldD),
+  },
+  {
+    id: "italic",
+    label: "Susurro Inclinado",
+    tag: "SLANT.ITAL",
+    transform: (t) => apply(t, italicU, italic),
+  },
+  {
+    id: "bold-italic",
+    label: "Lengua de Fuego",
+    tag: "BOLD.ITAL",
+    transform: (t) => apply(t, boldItalicU, boldItalic),
+  },
+  {
+    id: "script",
+    label: "Códice Manuscrito",
+    tag: "SCRIPT.CURSIVE",
+    transform: (t) => apply(t, scriptU, script),
+  },
+  {
+    id: "small-caps",
+    label: "Versales Espías",
+    tag: "CAPS.MICRO",
+    transform: (t) => apply(t.toLowerCase(), smallCaps),
+  },
+  {
+    id: "supersub",
+    label: "Órbita Superior",
+    tag: "RAISE.SUP",
+    transform: (t) => apply(t.toLowerCase(), superscript),
+  },
+  {
+    id: "subscript",
+    label: "Subterráneo",
+    tag: "DROP.SUB",
+    transform: (t) => apply(t.toLowerCase(), subscript),
+  },
+  { id: "cursed", label: "Texto Maldito", tag: "ZALGO.CURSED", transform: (t) => cursed(t) },
+  {
+    id: "runes",
+    label: "Sigilo Rúnico",
+    tag: "GLYPH.RUNIC",
+    transform: (t) => `ᚱ ${apply(t, boldU, bold).split("").join("·")} ᚱ`,
+  },
+  {
+    id: "tribal",
+    label: "Brasa Tribal",
+    tag: "FLAME.TRIBAL",
+    transform: (t) => `▰▰▰ ${apply(t, frakturBU, frakturB)} ▰▰▰`,
+  },
+  {
+    id: "hacker",
+    label: "Modo Hacker",
+    tag: "L33T.HACK",
+    transform: (t) =>
+      `[ ${t.toUpperCase().replace(/A/g, "4").replace(/E/g, "3").replace(/I/g, "1").replace(/O/g, "0").replace(/S/g, "5").replace(/T/g, "7")} ]`,
+  },
+  {
+    id: "occult",
+    label: "Sello Ocultista",
+    tag: "SEAL.OCCULT",
+    transform: (t) => `𓂀 ${apply(t, frakturBU, frakturB)} 𓂀`,
+  },
+  {
+    id: "deepweb",
+    label: "Firma Deep Web",
+    tag: "DARKNET.SIG",
+    transform: (t) => `⟁⟁⟁ ${apply(t, monoU, mono)} ⟁⟁⟁`,
+  },
+  {
+    id: "legion",
+    label: "Estandarte Legión",
+    tag: "LEGION.BANNER",
+    transform: (t) => `⸸⛧⸸ ${apply(t, frakturBU, frakturB)} ⸸⛧⸸`,
+  },
 ];
 
 export function generateAll(text: string): { style: Style; output: string }[] {

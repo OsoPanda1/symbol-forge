@@ -1,5 +1,6 @@
 // src/routes/__root.tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import {
   Outlet,
   Link,
@@ -7,10 +8,11 @@ import {
   useRouter,
   HeadContent,
   Scripts,
-} from "@tanstack/react-router"
+} from "@tanstack/react-router";
 
-import appCss from "../styles.css?url"
-import shellBg from "@/assets/96756-657131767.mp4"
+import appCss from "../styles.css?url";
+import OptimizedVideo from "@/components/OptimizedVideo";
+import shellBg from "@/assets/96756-657131767.mp4";
 
 function NotFoundComponent() {
   return (
@@ -31,12 +33,12 @@ function NotFoundComponent() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error)
-  const router = useRouter()
+  console.error(error);
+  const router = useRouter();
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -50,8 +52,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
-              router.invalidate()
-              reset()
+              router.invalidate();
+              reset();
             }}
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
@@ -66,7 +68,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -92,6 +94,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@TAMV_Online" },
     ],
     links: [
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&family=Cinzel:wght@600;800&display=swap",
+      },
       {
         rel: "stylesheet",
         href: appCss,
@@ -102,26 +110,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
-})
+});
 
-function RootShell({ children }: { children: React.ReactNode }) {
+function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
       <head>
         <HeadContent />
       </head>
       <body className="bg-background text-foreground">
-        {/* Capa de video global: centro de monitoreo de la red */}
-        <video
-          className="fixed inset-0 h-full w-full object-cover opacity-20 pointer-events-none"
-          autoPlay
-          muted
-          loop
-          playsInline
-        >
-          <source src={shellBg} type="video/mp4" />
-        </video>
-        <div className="fixed inset-0 bg-black/70 pointer-events-none" />
+        {/* Capa de video global: se activa en idle y respeta ahorro de datos/movimiento. */}
+        <OptimizedVideo
+          src={shellBg}
+          eager
+          wrapperClassName="pointer-events-none fixed inset-0"
+          className="h-full w-full object-cover opacity-20"
+          overlayClassName="absolute inset-0 bg-black/70"
+        />
 
         {/* Capa de aplicación */}
         <div className="relative z-10 min-h-screen">
@@ -130,15 +135,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
         </div>
       </body>
     </html>
-  )
+  );
 }
 
 function RootComponent() {
-  const { queryClient } = Route.useRouteContext()
+  const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
     </QueryClientProvider>
-  )
+  );
 }

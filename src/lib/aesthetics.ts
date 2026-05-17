@@ -80,7 +80,7 @@ export const STYLES: Style[] = [
   { id: "script", label: "Códice Manuscrito", tag: "SCRIPT.CURSIVE",
     transform: (t) => apply(t, scriptU, script) },
   { id: "small-caps", label: "Versales Espías", tag: "CAPS.MICRO",
-    transform: (t) => apply(t.toLowerCase(), smallCaps).toUpperCase().split("").map((c, i, a) => smallCaps[t.toLowerCase()[i]] ?? a[i]).join("") },
+    transform: (t) => apply(t.toLowerCase(), smallCaps) },
   { id: "supersub", label: "Órbita Superior", tag: "RAISE.SUP",
     transform: (t) => apply(t.toLowerCase(), superscript) },
   { id: "subscript", label: "Subterráneo", tag: "DROP.SUB",

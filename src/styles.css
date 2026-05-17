@@ -4,12 +4,17 @@
 
 @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&family=Cinzel:wght@600;800&display=swap");
 
+/* Variant para modo oscuro completo */
 @custom-variant dark (&:is(.dark *));
 
+/* ============================
+   THEME TOKENS · ALPHA RED HAT
+   ============================ */
+
 @theme inline {
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
-  --font-sans: "Space Grotesk", system-ui, sans-serif;
-  --font-display: "Cinzel", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-sans: "Space Grotesk", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Cinzel", "Times New Roman", serif;
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -43,60 +48,82 @@
   --color-terminal: var(--terminal);
 }
 
+/* ============================
+   ROOT PALETTE · DEEP WEB ALPHA
+   ============================ */
+
 :root {
   --radius: 0.25rem;
 
-  --background: oklch(0.13 0.015 25);
-  --foreground: oklch(0.92 0.02 80);
+  /* Fondo base: negro técnico con sutil tinte frío */
+  --background: oklch(0.10 0.02 260);
+  --foreground: oklch(0.96 0.02 95);
 
-  --card: oklch(0.16 0.02 25 / 70%);
-  --card-foreground: oklch(0.92 0.02 80);
-  --popover: oklch(0.16 0.02 25);
-  --popover-foreground: oklch(0.92 0.02 80);
+  --card: oklch(0.14 0.02 260 / 80%);
+  --card-foreground: oklch(0.96 0.02 95);
+  --popover: oklch(0.12 0.02 260 / 92%);
+  --popover-foreground: oklch(0.96 0.02 95);
 
-  --primary: oklch(0.55 0.22 25);
-  --primary-foreground: oklch(0.98 0.01 80);
+  /* Primario: rojo sangre Alpha (heptágono/alerta) */
+  --primary: oklch(0.58 0.26 25);
+  --primary-foreground: oklch(0.98 0.01 95);
 
-  --secondary: oklch(0.22 0.03 25);
-  --secondary-foreground: oklch(0.92 0.02 80);
+  /* Secundario: cian eléctrico de terminal */
+  --secondary: oklch(0.72 0.20 170);
+  --secondary-foreground: oklch(0.08 0.01 260);
 
-  --muted: oklch(0.20 0.02 25);
-  --muted-foreground: oklch(0.65 0.03 60);
+  --muted: oklch(0.20 0.02 260);
+  --muted-foreground: oklch(0.68 0.03 260);
 
-  --accent: oklch(0.30 0.05 25);
-  --accent-foreground: oklch(0.95 0.02 80);
+  --accent: oklch(0.30 0.05 260);
+  --accent-foreground: oklch(0.95 0.02 100);
 
-  --destructive: oklch(0.55 0.22 25);
-  --destructive-foreground: oklch(0.98 0.01 80);
+  --destructive: oklch(0.58 0.26 25);
+  --destructive-foreground: oklch(0.98 0.01 95);
 
-  --border: oklch(0.30 0.08 25 / 60%);
-  --input: oklch(0.22 0.03 25);
-  --ring: oklch(0.55 0.22 25);
+  --border: oklch(0.30 0.08 260 / 55%);
+  --input: oklch(0.18 0.02 260);
+  --ring: oklch(0.72 0.20 170);
 
-  /* custom tokens */
-  --blood: oklch(0.55 0.24 25);
-  --blood-glow: oklch(0.65 0.28 25);
+  /* Custom tokens · mitología Alpha Red Hat */
+  --blood: oklch(0.58 0.28 25);
+  --blood-glow: oklch(0.70 0.30 25);
   --acid: oklch(0.85 0.20 130);
-  --bone: oklch(0.92 0.02 80);
-  --ash: oklch(0.55 0.02 60);
-  --terminal: oklch(0.78 0.18 145);
+  --bone: oklch(0.96 0.02 95);
+  --ash: oklch(0.55 0.02 260);
+  --terminal: oklch(0.78 0.20 150);
 
-  --gradient-blood: linear-gradient(135deg, var(--blood) 0%, oklch(0.35 0.18 15) 100%);
-  --gradient-deep: radial-gradient(ellipse at top, oklch(0.20 0.05 25) 0%, oklch(0.08 0.01 25) 70%);
-  --shadow-blood: 0 0 40px oklch(0.55 0.24 25 / 35%);
-  --shadow-terminal: 0 0 20px oklch(0.78 0.18 145 / 40%);
+  --gradient-blood: linear-gradient(135deg, var(--blood) 0%, oklch(0.35 0.16 15) 100%);
+  --gradient-deep: radial-gradient(ellipse at top, oklch(0.16 0.04 260) 0%, oklch(0.06 0.01 260) 75%);
+  --gradient-terminal: linear-gradient(120deg, var(--terminal) 0%, oklch(0.55 0.15 160) 100%);
+
+  --shadow-blood: 0 0 40px oklch(0.58 0.28 25 / 35%);
+  --shadow-terminal: 0 0 22px oklch(0.78 0.20 150 / 45%);
 }
+
+/* ============================
+   BASE GLOBAL
+   ============================ */
 
 @layer base {
   * {
     border-color: var(--color-border);
   }
 
-  html, body {
+  html,
+  body {
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans);
     overflow-x: hidden;
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-image: var(--gradient-deep);
+    background-attachment: fixed;
+    background-size: cover;
   }
 
   ::selection {
@@ -105,20 +132,33 @@
   }
 }
 
-/* Matrix code rain background */
+/* ============================
+   MATRIX / DEEP WEB LAYER
+   ============================ */
+
 @keyframes matrix-fall {
-  0% { transform: translateY(-100%); opacity: 0; }
-  10% { opacity: 0.7; }
-  90% { opacity: 0.7; }
-  100% { transform: translateY(100vh); opacity: 0; }
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.7;
+  }
+  90% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
 }
 
 .matrix-col {
   position: absolute;
   top: 0;
   font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.2;
+  font-size: 13px;
+  line-height: 1.16;
   color: var(--terminal);
   text-shadow: 0 0 8px var(--terminal);
   writing-mode: vertical-rl;
@@ -126,30 +166,68 @@
   animation: matrix-fall linear infinite;
   user-select: none;
   pointer-events: none;
+  mix-blend-mode: screen;
+  opacity: 0.8;
 }
 
-/* Glitch effect */
+/* ============================
+   GLITCH EFFECT · HEADLINES
+   ============================ */
+
 @keyframes glitch-1 {
-  0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
-  20% { clip-path: inset(20% 0 60% 0); transform: translate(-2px, 1px); }
-  40% { clip-path: inset(50% 0 20% 0); transform: translate(2px, -1px); }
-  60% { clip-path: inset(10% 0 70% 0); transform: translate(-1px, 0); }
-  80% { clip-path: inset(70% 0 10% 0); transform: translate(1px, 1px); }
+  0%,
+  100% {
+    clip-path: inset(0 0 0 0);
+    transform: translate(0);
+  }
+  20% {
+    clip-path: inset(16% 0 62% 0);
+    transform: translate(-2px, 1px);
+  }
+  40% {
+    clip-path: inset(52% 0 16% 0);
+    transform: translate(3px, -2px);
+  }
+  60% {
+    clip-path: inset(8% 0 70% 0);
+    transform: translate(-1px, 0);
+  }
+  80% {
+    clip-path: inset(70% 0 10% 0);
+    transform: translate(1px, 1px);
+  }
 }
 
 @keyframes glitch-2 {
-  0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
-  20% { clip-path: inset(60% 0 20% 0); transform: translate(2px, -1px); }
-  40% { clip-path: inset(20% 0 50% 0); transform: translate(-2px, 1px); }
-  60% { clip-path: inset(70% 0 10% 0); transform: translate(1px, 0); }
-  80% { clip-path: inset(10% 0 70% 0); transform: translate(-1px, -1px); }
+  0%,
+  100% {
+    clip-path: inset(0 0 0 0);
+    transform: translate(0);
+  }
+  20% {
+    clip-path: inset(60% 0 20% 0);
+    transform: translate(2px, -1px);
+  }
+  40% {
+    clip-path: inset(22% 0 50% 0);
+    transform: translate(-3px, 2px);
+  }
+  60% {
+    clip-path: inset(72% 0 10% 0);
+    transform: translate(1px, 0);
+  }
+  80% {
+    clip-path: inset(10% 0 70% 0);
+    transform: translate(-1px, -2px);
+  }
 }
 
 .glitch {
   position: relative;
   display: inline-block;
 }
-.glitch::before, .glitch::after {
+.glitch::before,
+.glitch::after {
   content: attr(data-text);
   position: absolute;
   inset: 0;
@@ -157,7 +235,7 @@
 }
 .glitch::before {
   color: var(--blood);
-  animation: glitch-1 2.5s infinite steps(2);
+  animation: glitch-1 2.4s infinite steps(2);
   mix-blend-mode: screen;
 }
 .glitch::after {
@@ -166,7 +244,10 @@
   mix-blend-mode: screen;
 }
 
-/* Scanline overlay */
+/* ============================
+   SCANLINES & VIGNETTE
+   ============================ */
+
 .scanlines::before {
   content: "";
   position: fixed;
@@ -188,56 +269,93 @@
   inset: 0;
   pointer-events: none;
   z-index: 51;
-  background: radial-gradient(ellipse at center, transparent 40%, oklch(0 0 0 / 60%) 100%);
+  background: radial-gradient(ellipse at center, transparent 40%, oklch(0 0 0 / 65%) 100%);
 }
 
-/* Marquee */
+/* ============================
+   MARQUEE · RUÍDO SÍMBOLOS
+   ============================ */
+
 @keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 .marquee-track {
-  animation: marquee 80s linear infinite;
+  animation: marquee 75s linear infinite;
   white-space: nowrap;
   display: inline-block;
+  will-change: transform;
 }
 
-/* Pulse blood */
+/* ============================
+   PULSO / FLICKER
+   ============================ */
+
 @keyframes blood-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(0.55 0.24 25 / 70%); }
-  50% { box-shadow: 0 0 30px 8px oklch(0.55 0.24 25 / 0%); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.58 0.28 25 / 70%);
+  }
+  50% {
+    box-shadow: 0 0 32px 10px oklch(0.58 0.28 25 / 0%);
+  }
 }
-.blood-pulse { animation: blood-pulse 2.5s ease-in-out infinite; }
+.blood-pulse {
+  animation: blood-pulse 2.7s ease-in-out infinite;
+}
 
-/* Flicker */
 @keyframes flicker {
-  0%, 100% { opacity: 1; }
-  41% { opacity: 1; }
-  42% { opacity: 0.4; }
-  43% { opacity: 1; }
-  91% { opacity: 1; }
-  92% { opacity: 0.6; }
-  93% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  41% {
+    opacity: 1;
+  }
+  42% {
+    opacity: 0.35;
+  }
+  43% {
+    opacity: 1;
+  }
+  91% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 0.55;
+  }
+  93% {
+    opacity: 1;
+  }
 }
-.flicker { animation: flicker 4s infinite; }
+.flicker {
+  animation: flicker 4.2s infinite;
+}
 
-/* Custom buttons */
+/* ============================
+   BOTONES · BLOOD / GHOST
+   ============================ */
+
 .btn-blood {
   background: var(--gradient-blood);
   color: var(--bone);
   border: 1px solid var(--blood-glow);
   font-family: var(--font-mono);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 0.85rem 1.5rem;
-  font-size: 0.85rem;
+  letter-spacing: 0.16em;
+  padding: 0.85rem 1.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
-  transition: all 0.2s ease;
+  transition: all 0.14s ease-out;
   box-shadow: var(--shadow-blood);
-  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
 }
 .btn-blood:hover {
-  filter: brightness(1.2);
+  filter: brightness(1.18);
   transform: translateY(-1px);
 }
 
@@ -247,43 +365,77 @@
   border: 1px solid var(--border);
   font-family: var(--font-mono);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 0.85rem 1.5rem;
-  font-size: 0.85rem;
+  letter-spacing: 0.16em;
+  padding: 0.85rem 1.8rem;
+  font-size: 0.78rem;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: all 0.14s ease-out;
 }
 .btn-ghost:hover {
   border-color: var(--blood);
   color: var(--blood-glow);
-  background: oklch(0.55 0.24 25 / 8%);
+  background: oklch(0.58 0.28 25 / 8%);
 }
+
+/* ============================
+   TERMINAL / PANELS / BADGES
+   ============================ */
 
 .terminal-text {
   font-family: var(--font-mono);
   color: var(--terminal);
-  text-shadow: 0 0 8px oklch(0.78 0.18 145 / 50%);
+  text-shadow: 0 0 8px oklch(0.78 0.20 150 / 55%);
 }
 
 .panel {
-  background: oklch(0.13 0.015 25 / 70%);
-  backdrop-filter: blur(8px);
+  background: oklch(0.10 0.02 260 / 78%);
+  backdrop-filter: blur(10px);
   border: 1px solid var(--border);
   position: relative;
 }
 .panel::before {
   content: "";
   position: absolute;
-  top: -1px; left: -1px;
-  width: 14px; height: 14px;
+  top: -1px;
+  left: -1px;
+  width: 16px;
+  height: 16px;
   border-top: 2px solid var(--blood);
   border-left: 2px solid var(--blood);
 }
 .panel::after {
   content: "";
   position: absolute;
-  bottom: -1px; right: -1px;
-  width: 14px; height: 14px;
+  bottom: -1px;
+  right: -1px;
+  width: 16px;
+  height: 16px;
   border-bottom: 2px solid var(--blood);
   border-right: 2px solid var(--blood);
+}
+
+/* Badge tipo "deep web" */
+.badge-alpha {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: oklch(0.14 0.02 260 / 90%);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--terminal);
+}
+
+/* Contenedor heptágono (para Three.js canvas) */
+.heptagon-frame {
+  position: relative;
+  border-radius: 999px;
+  border: 1px solid oklch(0.30 0.12 260 / 70%);
+  box-shadow: 0 0 30px oklch(0.72 0.20 170 / 35%);
+  overflow: hidden;
+  background: radial-gradient(circle at center, oklch(0.18 0.05 260) 0%, oklch(0.06 0.01 260) 80%);
 }

@@ -1,137 +1,238 @@
+ "use client"
+
+import { useState } from "react"
+
+type PlanId = "single" | "legion"
+
 type Plan = {
-  id: string;
-  name: string;
-  price: string;
-  desc: string;
-  perks: string[];
-  highlight?: boolean;
-};
+  id: PlanId
+  name: string
+  price: string
+  desc: string
+  perks: string[]
+  highlight?: boolean
+  psychology: string
+}
 
 const PLANS: Plan[] = [
   {
     id: "single",
     name: "Forja Individual",
     price: "$30 MXN",
-    desc: "Un símbolo de resistencia. Tu estandarte personal.",
+    desc: "Un símbolo para marcar territorio en un internet que nunca pensó en ti.",
     perks: [
       "1 símbolo especial (texto o imagen)",
-      "Hash de forja único · no se duplica",
+      "Hash de forja único dentro del índice Alpha",
       "Sellado por The Alpha Red Hat",
       "Entrega instantánea tras pago",
     ],
+    psychology: "Para el que entiende que un solo estandarte bien puesto vale más que mil posts.",
   },
   {
     id: "legion",
     name: "Paquete de Legión",
     price: "$150 MXN",
-    desc: "10 símbolos. La base simbólica de una orden completa.",
+    desc: "10 símbolos. Suficiente para nombrar a una orden, un clan y sus sub‑nodos.",
     perks: [
-      "10 símbolos especiales",
-      "Para clan, squad, comunidad o proyecto",
-      "Hashes de forja individuales",
-      "Manifiesto digital firmado",
-      "Acceso a lista de espera ALPHA+",
+      "10 símbolos especiales independientes",
+      "Diseñados para clan, squad, comunidad o protocolo de proyecto",
+      "Hashes de forja individuales por símbolo",
+      "Mini‑manifiesto digital firmado para la legión",
+      "Ingreso a lista de espera ALPHA+ (experimentos cerrados)",
     ],
     highlight: true,
+    psychology: "Para quienes no vienen solos: vienen con tropa, con nombres de guerra y reglas propias.",
   },
-];
+]
 
 export default function AlphaForge() {
+  const [selectedPlan, setSelectedPlan] = useState<PlanId>("legion")
+
+  const handleForge = (plan: Plan) => {
+    // Aquí luego cableas al checkout real
+    alert(
+      `La forja Alpha (${plan.id}) se activará en la siguiente fase.\n\nPlan: ${plan.name}\nPrecio: ${plan.price}`,
+    )
+  }
+
   return (
     <section id="forge" className="relative z-10 px-4 py-24">
       <div className="mx-auto max-w-6xl">
-        <header className="mb-12">
-          <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-blood-glow">
-            // MÓDULO_02 · ALPHA.FORGE · ACCESS=RESTRICTED
+        {/* HEADER MÓDULO ALPHA */}
+        <header className="mb-10">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-blood-glow">
+              // MÓDULO_02 · ALPHA.FORGE · ACCESS=RESTRICTED
+            </div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-ash">
+              zona de símbolos no replicables · índice interno alpha.red
+            </div>
           </div>
+
           <h2
-            className="glitch mt-3 font-display text-3xl font-bold uppercase tracking-tight md:text-5xl"
+            className="glitch mt-4 font-display text-3xl font-bold uppercase tracking-tight md:text-5xl"
             data-text="Forja tu símbolo de resistencia"
           >
             Forja tu símbolo de resistencia
           </h2>
-          <p className="mt-4 max-w-2xl font-mono text-sm text-muted-foreground">
-            Con una imagen o una idea escrita, creas tu estandarte digital para bios, firmas, comunidades y proyectos. Los símbolos forjados aquí están vinculados a la forja Alpha Red Hat y{" "}
-            <span className="text-bone">no se liberan en generadores públicos</span>.
+
+          <p className="mt-4 max-w-2xl font-mono text-sm text-muted-foreground md:text-base">
+            Con una imagen o una idea escrita, creas tu{" "}
+            <span className="text-bone">estandarte digital</span> para bios, firmas, comunidades y
+            proyectos. Todo símbolo que pase por aquí queda indexado en la forja Alpha Red Hat y{" "}
+            <span className="text-bone">
+              no se libera en generadores genéricos ni catálogos públicos
+            </span>
+            .
+          </p>
+
+          <p className="mt-2 max-w-2xl font-mono text-[11px] text-ash">
+            &gt; Esto no es un producto masivo. Es un taller clandestino de heráldica digital en una
+            red que no está diseñada para reconocer tu existencia.
           </p>
         </header>
 
+        {/* MODO DE FORJA: PROMPT / IMAGEN */}
         <div className="mb-12 grid gap-4 md:grid-cols-2">
           <ForgeMode
             tag="MODE.TEXT → SIGIL"
             title="A partir de un prompt"
             steps={[
-              "Escribes lo que quieres representar.",
-              "La IA forja 3–5 símbolos candidatos.",
-              "Eliges, pagas, copias tu estandarte.",
+              "Escribes qué quieres representar (legión, idea, rol, fractura).",
+              "El núcleo IA genera 3–5 símbolos candidatos.",
+              "Eliges uno, pagas, se registra en la forja y es tuyo.",
             ]}
           />
           <ForgeMode
             tag="MODE.IMAGE → SIGIL"
             title="A partir de una imagen"
             steps={[
-              "Subes un logo, dibujo o ícono simple.",
-              "Visión IA extrae su esencia.",
-              "Recibes su versión textual forjada.",
+              "Subes un logo, dibujo o ícono simple (sin ruido).",
+              "Visión IA destila su forma y significado.",
+              "Recibes una versión textual que puedes pegar en cualquier sistema.",
             ]}
           />
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          {PLANS.map((p) => (
-            <div
-              key={p.id}
-              className={`panel relative p-6 md:p-8 ${
-                p.highlight ? "border-blood/60 shadow-[var(--shadow-blood)]" : ""
+        {/* SWITCH: ¿VIENES SOLO O CON LEGIÓN? */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-ash">
+            // ELIGE TU CONFIGURACIÓN DE ATAQUE
+          </div>
+          <div className="inline-flex overflow-hidden rounded-full border border-border bg-black/70 font-mono text-[10px] uppercase tracking-[0.22em]">
+            <button
+              type="button"
+              onClick={() => setSelectedPlan("single")}
+              className={`px-3 py-1.5 transition-colors ${
+                selectedPlan === "single"
+                  ? "bg-blood text-bone"
+                  : "bg-transparent text-ash hover:text-bone"
               }`}
             >
-              {p.highlight && (
-                <div className="absolute -top-3 left-6 border border-blood bg-background px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-blood-glow">
-                  ⸸ recomendado por la forja
-                </div>
-              )}
-              <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-ash">
-                {p.id === "single" ? "TIER.SOLO" : "TIER.LEGION"}
-              </div>
-              <h3 className="mt-2 font-display text-2xl font-bold uppercase tracking-tight md:text-3xl">
-                {p.name}
-              </h3>
-              <div className="mt-4 font-display text-5xl font-extrabold text-bone">
-                {p.price}
-              </div>
-              <p className="mt-3 font-mono text-sm text-muted-foreground">{p.desc}</p>
-              <ul className="mt-6 space-y-2 font-mono text-sm text-bone">
-                {p.perks.map((perk) => (
-                  <li key={perk} className="flex items-start gap-2">
-                    <span className="mt-0.5 text-blood-glow">▸</span>
-                    <span>{perk}</span>
-                  </li>
-                ))}
-              </ul>
-              <button
-                className={`mt-8 w-full ${p.highlight ? "btn-blood blood-pulse" : "btn-ghost"}`}
-                onClick={() =>
-                  alert(
-                    "La forja Alpha estará disponible en la próxima fase. Pasarela de pagos en integración."
-                  )
-                }
-              >
-                {p.highlight ? "⸸ Forjar la Legión" : "⌁ Forjar 1 símbolo"}
-              </button>
-            </div>
-          ))}
+              Operador Solo
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedPlan("legion")}
+              className={`px-3 py-1.5 transition-colors ${
+                selectedPlan === "legion"
+                  ? "bg-terminal text-black"
+                  : "bg-transparent text-ash hover:text-bone"
+              }`}
+            >
+              Legión Completa
+            </button>
+          </div>
         </div>
 
+        {/* PLANES CON PSICOLOGÍA DE DECISIÓN */}
+        <div className="grid gap-4 md:grid-cols-2">
+          {PLANS.map((p) => {
+            const selected = selectedPlan === p.id
+            return (
+              <div
+                key={p.id}
+                className={`panel relative flex flex-col p-6 md:p-8 ${
+                  p.highlight ? "border-blood/60 shadow-[var(--shadow-blood)]" : ""
+                } ${selected ? "ring-1 ring-blood" : ""}`}
+              >
+                {p.highlight && (
+                  <div className="absolute -top-3 left-6 border border-blood bg-background px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-blood-glow">
+                    ⸸ configuración recomendada por la forja
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-ash">
+                    {p.id === "single" ? "TIER.SOLO" : "TIER.LEGION"}
+                  </div>
+                  {selected && (
+                    <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-terminal">
+                      &gt; seleccionado
+                    </div>
+                  )}
+                </div>
+
+                <h3 className="mt-2 font-display text-2xl font-bold uppercase tracking-tight md:text-3xl">
+                  {p.name}
+                </h3>
+
+                <div className="mt-4 font-display text-5xl font-extrabold text-bone">
+                  {p.price}
+                  <span className="ml-2 align-middle font-mono text-xs text-ash">
+                    {p.id === "single" ? "/ símbolo" : "/ 10 símbolos"}
+                  </span>
+                </div>
+
+                <p className="mt-3 font-mono text-sm text-muted-foreground">{p.desc}</p>
+
+                <ul className="mt-6 space-y-2 font-mono text-sm text-bone">
+                  {p.perks.map((perk) => (
+                    <li key={perk} className="flex items-start gap-2">
+                      <span className="mt-0.5 text-blood-glow">▸</span>
+                      <span>{perk}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <p className="mt-4 font-mono text-[11px] text-ash">{p.psychology}</p>
+
+                <button
+                  className={`mt-8 w-full ${
+                    p.highlight ? "btn-blood blood-pulse" : "btn-ghost"
+                  }`}
+                  onClick={() => handleForge(p)}
+                >
+                  {p.highlight ? "⸸ Forjar la Legión" : "⌁ Forjar 1 símbolo"}
+                </button>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* MENSAJE FINAL · MARCO MENTAL */}
         <p className="mt-10 max-w-3xl border-l-2 border-blood/60 pl-4 font-mono text-xs italic text-ash md:text-sm">
-          &gt; No te prometemos que este símbolo cambiará el mundo. Pero sí te prometemos algo:
-          no salió de un generador genérico. Lo forjaste tú en la zona de hackeo de The Alpha Red Hat.
+          &gt; No te prometemos que un símbolo cambie el mundo. Te prometemos algo más concreto:
+          este símbolo{" "}
+          <span className="text-bone">
+            no salió de una app genérica ni de un catálogo para masas
+          </span>
+          . Lo forjaste tú, en una zona de hackeo que la mayoría nunca verá.
         </p>
       </div>
     </section>
-  );
+  )
 }
 
-function ForgeMode({ tag, title, steps }: { tag: string; title: string; steps: string[] }) {
+function ForgeMode({
+  tag,
+  title,
+  steps,
+}: {
+  tag: string
+  title: string
+  steps: string[]
+}) {
   return (
     <div className="panel p-5">
       <div className="font-mono text-[10px] uppercase tracking-widest text-terminal">{tag}</div>
@@ -145,5 +246,5 @@ function ForgeMode({ tag, title, steps }: { tag: string; title: string; steps: s
         ))}
       </ol>
     </div>
-  );
+  )
 }

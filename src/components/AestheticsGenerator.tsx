@@ -1,7 +1,9 @@
+// src/components/AestheticsGenerator.tsx
 "use client"
 
 import { useMemo, useState } from "react"
 import { generateAll } from "@/lib/aesthetics"
+import aestheticsBg from "@/assets/246877_medium.mp4"
 
 type Props = {
   initialText?: string
@@ -58,49 +60,62 @@ export default function AestheticsGenerator({ initialText = "anubis villaseñor"
           </p>
 
           <p className="mt-2 max-w-2xl font-mono text-[11px] text-ash">
-            &gt; Todo lo que forjes aquí es público. El modo ALPHA es donde los símbolos dejan de
-            ser sandbox y pasan a ser estandartes.
+            &gt; Todo lo que forjes aquí es público. El modo ALPHA es donde los símbolos dejan de ser
+            sandbox y pasan a ser estandartes.
           </p>
         </header>
 
         {/* BLOQUE INPUT + STATS */}
         <div className="grid gap-6 md:grid-cols-[minmax(0,2fr)_minmax(0,1.2fr)]">
-          {/* Panel de entrada */}
-          <div className="panel p-4 md:p-6">
-            <div className="flex items-center justify-between">
-              <label className="block font-mono text-[10px] uppercase tracking-[0.26em] text-terminal">
-                &gt; INPUT.txT
-              </label>
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">
-                sandbox · legiones
-              </span>
-            </div>
+          {/* Panel de entrada con video de fondo */}
+          <div className="panel relative overflow-hidden p-4 md:p-6">
+            <video
+              className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-25"
+              autoPlay
+              muted
+              loop
+              playsInline
+            >
+              <source src={aestheticsBg} type="video/mp4" />
+            </video>
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black/90" />
 
-            <input
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="escribe tu texto, alias o estandarte base..."
-              className="mt-3 w-full border-0 border-b border-border bg-transparent pb-2 pt-1 font-mono text-xl text-bone outline-none focus:border-blood-glow md:text-2xl"
-              maxLength={120}
-            />
+            <div className="relative">
+              <div className="flex items-center justify-between">
+                <label className="block font-mono text-[10px] uppercase tracking-[0.26em] text-terminal">
+                  &gt; INPUT.txT
+                </label>
+                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ash">
+                  sandbox · legiones
+                </span>
+              </div>
 
-            <div className="mt-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
-              <span>
-                caracteres: {text.length} / 120 · variaciones: {results.length || 18}
-              </span>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setText("anubis villaseñor")}
-                  className="text-terminal hover:text-acid transition-colors"
-                >
-                  [ cargar_demo ]
-                </button>
-                <button
-                  onClick={() => setText("")}
-                  className="text-blood-glow hover:text-blood transition-colors"
-                >
-                  [ purgar ]
-                </button>
+              <input
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="escribe tu texto, alias o estandarte base..."
+                className="mt-3 w-full border-0 border-b border-border bg-transparent pb-2 pt-1 font-mono text-xl text-bone outline-none focus:border-blood-glow md:text-2xl"
+                maxLength={120}
+              />
+
+              <div className="mt-2 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
+                <span>
+                  caracteres: {text.length} / 120 · variaciones: {results.length || 18}
+                </span>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setText("anubis villaseñor")}
+                    className="text-terminal hover:text-acid transition-colors"
+                  >
+                    [ cargar_demo ]
+                  </button>
+                  <button
+                    onClick={() => setText("")}
+                    className="text-blood-glow hover:text-blood transition-colors"
+                  >
+                    [ purgar ]
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -135,7 +150,7 @@ export default function AestheticsGenerator({ initialText = "anubis villaseñor"
         {/* RESULTADOS · TARJETAS DE SÍMBOLOS */}
         <div className="mt-10 border-t border-border/60 pt-6">
           <div className="mb-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-ash">
-            <span>// salida_estética · click_para_inyectar_en_el_portapapeles</span>
+            <span>// salida_estética · click_para_inyectar_en_el_portapapapeles</span>
             <span className="text-terminal">
               símbolos activos: {results.length || 18} · modo: público
             </span>

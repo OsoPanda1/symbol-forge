@@ -20,41 +20,161 @@ type SigilCandidate = {
 const PLANS = [
   {
     id: "single" as const,
-    name: "Forja Individual",
+    name: "Forja individual",
     price: "$30 MXN",
-    desc: "Un símbolo para marcar territorio en un internet que nunca pensó en ti.",
-    perks: [
-      "4 candidatos generados por IA",
-      "Eliges 1 sigil final + sello copiable",
-      "Hash único en el índice Alpha",
-      "Liberación instantánea tras pago",
-    ],
-    delivery: "1 sigil validado · entrega inmediata",
+    desc: "Un símbolo final con validación y entrega inmediata.",
+    perks: ["4 candidatos", "1 sigilo final", "Hash de orden", "Checkout seguro"],
+    delivery: "1 sigilo desbloqueado",
   },
   {
     id: "legion" as const,
-    name: "Paquete de Legión",
+    name: "Protocolo legión",
     price: "$150 MXN",
-    desc: "10 símbolos. Suficiente para nombrar a una orden, un clan y sus sub‑nodos.",
-    perks: [
-      "10 sigils generados por IA + variaciones determinísticas",
-      "Manifiesto digital firmado",
-      "Hashes individuales por símbolo",
-      "Acceso a lista ALPHA+",
-    ],
-    delivery: "10 variantes + manifiesto de legión",
+    desc: "Lote de 10 firmas para branding de proyecto, equipo o comunidad.",
+    perks: ["10 candidatos", "Hash por orden", "Entrega automática", "Historial en consola"],
+    delivery: "10 firmas + manifiesto",
   },
 ];
 
 const DEFAULT_PROMPT = "legión jaguar de frontera";
 
+const INTRO_MESSAGE =
+  "Bienvenido a la linea que divide a los usuarios de los elegidos, presiona enter para abrir las firewalls de la biomatrix";
+
+async function requestMediaPermissions(): Promise<void> {
+  if (typeof window === "undefined" || !navigator.mediaDevices?.getUserMedia) return;
+  const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+  stream.getTracks().forEach((track) => track.stop());
+}
+
+function CinematicIntro({ onFinish }: { onFinish: () => void }) {
+  const [typedText, setTypedText] = useState("");
+  const [isTypingDone, setIsTypingDone] = useState(false);
+  const [isOpening, setIsOpening] = useState(false);
+  const [permissionError, setPermissionError] = useState<string | null>(null);
+  const [showVideo, setShowVideo] = useState(false);
+
+  useEffect(() => {
+    let index = 0;
+    const timer = window.setInterval(() => {
+      index += 1;
+      setTypedText(INTRO_MESSAGE.slice(0, index));
+      if (index >= INTRO_MESSAGE.length) {
+        window.clearInterval(timer);
+        setIsTypingDone(true);
+      }
+    }, 35);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const handleEnter = async () => {
+    if (isOpening) return;
+    setPermissionError(null);
+    setIsOpening(true);
+    try {
+      await requestMediaPermissions();
+      setShowVideo(true);
+    } catch {
+      setPermissionError("No se concedieron permisos de audio/video. Puedes intentar nuevamente.");
+      setIsOpening(false);
+    }
+  };
+
+  return (
+    <section className="fixed inset-0 z-50 grid place-items-center bg-black p-6">
+      <div className="w-full max-w-4xl space-y-5 border border-red-900/50 bg-black/95 p-6 md:p-8">
+        {!showVideo ? (
+          <>
+            <div className="font-mono text-base text-red-400 md:text-lg">
+              {typedText}
+              <span className="animate-pulse">▌</span>
+            </div>
+            {isTypingDone && (
+              <div className="space-y-3">
+                <p className="font-mono text-xs text-ash">Se solicitarán permisos de audio y video para abrir la transmisión.</p>
+                <button
+                  type="button"
+                  onClick={handleEnter}
+                  disabled={isOpening}
+                  className="w-full border border-red-500 bg-red-700/80 px-6 py-3 font-mono text-sm font-bold uppercase tracking-[0.3em] text-bone shadow-[0_0_20px_rgba(255,0,50,0.45)] transition hover:bg-red-600 disabled:opacity-60"
+                >
+                  {isOpening ? "ABRIENDO..." : "ENTER"}
+                </button>
+                {permissionError && <p className="font-mono text-xs text-red-300">{permissionError}</p>}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="space-y-4">
+            <div className="aspect-video overflow-hidden border border-red-900/50 bg-black">
+              <iframe
+                title="La Biomatrix ha sido tomada"
+                src="https://www.youtube.com/embed/aRgsTqreA_w?start=2&autoplay=1&rel=0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="h-full w-full"
+              />
+            </div>
+            <button type="button" onClick={onFinish} className="btn-blood w-full">
+              Continuar a la plataforma
+            </button>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+const playSynthTone = (freq = 800, duration = 0.08) => {
+  if (typeof window === "undefined") return;
+  try {
+    const AC = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return;
+    const ctx = new AC();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(0.03, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + duration);
+  } catch {
+    // noop
+  }
+};
+
 async function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
+    reader.onerror = () => reject(new Error("No se pudo procesar la imagen."));
     reader.readAsDataURL(file);
   });
+}
+
+function SafeSigilRenderer({ content, isObfuscated = false }: { content: string; isObfuscated?: boolean }) {
+  const sanitizedContent = useMemo(() => {
+    let clean = content || "";
+    clean = clean.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+    clean = clean.replace(/\son\w+\s*=\s*(["'][^"']*["']|[^\s>]+)/gi, "");
+    clean = clean.replace(/href\s*=\s*["']\s*javascript:[^"']*["']/gi, 'href="#"');
+    return clean;
+  }, [content]);
+
+  if (!sanitizedContent) return <div className="font-mono text-xs text-ash/50">SIN_SEÑAL</div>;
+
+  return (
+    <div className="relative h-full w-full">
+      <div
+        className={`h-full w-full [&>svg]:h-full [&>svg]:w-full ${isObfuscated ? "blur-[6px] opacity-35 pointer-events-none" : ""}`}
+        dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+      />
+      {isObfuscated && <div className="absolute inset-0 grid place-items-center text-[9px] font-mono text-red-400">Muestra protegida</div>}
+    </div>
+  );
 }
 
 export default function AlphaForge() {
@@ -78,6 +198,7 @@ export default function AlphaForge() {
   const [candidates, setCandidates] = useState<SigilCandidate[]>([]);
   const [selectedSigilId, setSelectedSigilId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -86,11 +207,11 @@ export default function AlphaForge() {
     };
   }, [imagePreview]);
 
-  const selected = PLANS.find((p) => p.id === selectedPlan)!;
-  const canForge =
-    prompt.trim().length >= 2 &&
-    contact.trim().length >= 3 &&
-    (mode === "text" || imageFile != null);
+  const selected = useMemo(() => PLANS.find((p) => p.id === selectedPlan)!, [selectedPlan]);
+  const canForge = useMemo(
+    () => prompt.trim().length >= 2 && contact.trim().length >= 3 && (mode === "text" || imageFile != null),
+    [prompt, contact, mode, imageFile],
+  );
 
   const handleImage = (file?: File) => {
     if (!file) return;
@@ -103,6 +224,7 @@ export default function AlphaForge() {
     setImagePreview(URL.createObjectURL(file));
     setMode("image");
     setError(null);
+    playSynthTone(900);
   };
 
   const onForge = async () => {
@@ -111,29 +233,27 @@ export default function AlphaForge() {
     setCandidates([]);
     setSelectedSigilId(null);
     try {
-      let result;
-      if (mode === "image" && imageFile) {
-        const dataUrl = await fileToDataUrl(imageFile);
-        result = await forgeImageFn({
-          data: {
-            prompt: prompt.trim(),
-            contact: contact.trim(),
-            plan: selectedPlan,
-            imageDataUrl: dataUrl,
-            imageName: imageFile.name,
-          },
-        });
-      } else {
-        result = await forgeTextFn({
-          data: { prompt: prompt.trim(), contact: contact.trim(), plan: selectedPlan },
-        });
-      }
+      const result =
+        mode === "image" && imageFile
+          ? await forgeImageFn({
+              data: {
+                prompt: prompt.trim(),
+                contact: contact.trim(),
+                plan: selectedPlan,
+                imageDataUrl: await fileToDataUrl(imageFile),
+                imageName: imageFile.name,
+              },
+            })
+          : await forgeTextFn({ data: { prompt: prompt.trim(), contact: contact.trim(), plan: selectedPlan } });
+
+      const sigils = result.sigils as SigilCandidate[];
       setOrderId(result.orderId);
       setHash(result.hash);
-      setCandidates(result.sigils as SigilCandidate[]);
-      if (result.sigils.length) setSelectedSigilId((result.sigils[0] as SigilCandidate).id);
+      setCandidates(sigils);
+      if (sigils.length > 0) setSelectedSigilId(sigils[0].id);
+      playSynthTone(1200);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Error al forjar");
+      setError(e instanceof Error ? e.message : "Error al forjar.");
     } finally {
       setForging(false);
     }
@@ -141,11 +261,12 @@ export default function AlphaForge() {
 
   const onSelectSigil = async (sigilId: string) => {
     setSelectedSigilId(sigilId);
+    playSynthTone(750);
     if (!orderId) return;
     try {
       await selectSigilFn({ data: { orderId, sigilId } });
     } catch {
-      /* silent */
+      // noop
     }
   };
 
@@ -166,183 +287,74 @@ export default function AlphaForge() {
   const onCopy = async () => {
     const sigil = candidates.find((c) => c.id === selectedSigilId);
     if (!sigil) return;
-    await navigator.clipboard.writeText(sigil.content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1400);
+    try {
+      await navigator.clipboard.writeText(sigil.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1400);
+    } catch {
+      setError("No fue posible copiar en el portapapeles.");
+    }
   };
 
-  const selectedSigil = useMemo(
-    () => candidates.find((c) => c.id === selectedSigilId),
-    [candidates, selectedSigilId],
-  );
+  const selectedSigil = useMemo(() => candidates.find((c) => c.id === selectedSigilId), [candidates, selectedSigilId]);
+
+  if (!isUnlocked) return <CinematicIntro onFinish={() => setIsUnlocked(true)} />;
 
   return (
     <section id="forge" className="relative z-10 overflow-hidden px-4 py-24">
-      <OptimizedVideo
-        src={forgeBg}
-        wrapperClassName="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
-        className="h-full w-full object-cover opacity-30"
-        overlayClassName="absolute inset-0 bg-gradient-to-b from-black/85 via-black/80 to-black/95"
-      />
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[600px] bg-[radial-gradient(ellipse_at_top,_rgba(255,0,60,0.18)_0,_transparent_70%)]" />
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(transparent_95%,rgba(255,0,60,0.06)_95%)] bg-[length:100%_4px]" />
-
-      <div className="mx-auto max-w-6xl">
-        <header className="mb-10">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-blood-glow">
-              // MÓDULO_02 · ALPHA.FORGE · ACCESS=PRODUCTION
-            </div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-ash">
-              IA + Stripe · liberación tras pago verificado
-            </div>
-          </div>
-          <h2
-            className="glitch mt-4 font-display text-3xl font-bold uppercase tracking-tight md:text-5xl"
-            data-text="Forja tu símbolo de resistencia"
-          >
-            Forja tu símbolo de resistencia
-          </h2>
-          <p className="mt-4 max-w-2xl font-mono text-sm text-muted-foreground md:text-base">
-            Describe una idea o sube una imagen base. La forja genera{" "}
-            <span className="text-bone">candidatos únicos con IA</span>, los guarda con tu hash, y
-            tras pagar por Stripe se liberan los sigils finales para ti.
-          </p>
+      <OptimizedVideo src={forgeBg} wrapperClassName="pointer-events-none absolute inset-0 -z-10 overflow-hidden" className="h-full w-full object-cover opacity-20" overlayClassName="absolute inset-0 bg-gradient-to-b from-black/85 via-black/80 to-black/95" />
+      <div className="mx-auto max-w-6xl space-y-6">
+        <header>
+          <h2 className="font-display text-4xl text-bone uppercase">Forja de símbolos</h2>
+          <p className="font-mono text-sm text-ash">Genera candidatos, selecciona uno y completa checkout para liberar el activo final.</p>
         </header>
-
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-          {/* LEFT: input */}
-          <div className="panel relative overflow-hidden p-5 md:p-6">
-            <div className="absolute -top-px left-1/2 h-px w-1/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-blood-glow to-transparent" />
-
-            <div className="mb-4 flex gap-2">
-              <ModePill active={mode === "text"} onClick={() => setMode("text")} label="TEXT → SIGIL" />
-              <ModePill
-                active={mode === "image"}
-                onClick={() => setMode("image")}
-                label="IMAGE → SIGIL"
-              />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="panel p-5 space-y-4">
+            <div className="flex gap-2">
+              <button className="btn-ghost" onClick={() => setMode("text")}>TEXT</button>
+              <button className="btn-ghost" onClick={() => setMode("image")}>IMAGE</button>
             </div>
-
-            <label className="block font-mono text-[10px] uppercase tracking-[0.22em] text-ash">
-              Prompt base
-              <textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                maxLength={220}
-                placeholder="Describe tu clan, causa, marca o rol simbólico..."
-                className="mt-2 min-h-28 w-full resize-y border border-border bg-black/60 p-3 text-sm normal-case tracking-normal text-bone outline-none transition-colors focus:border-blood-glow"
-              />
-            </label>
-
+            <textarea value={prompt} onChange={(e)=>setPrompt(e.target.value)} className="w-full min-h-28 bg-black/60 border border-border p-3" />
             {mode === "image" && (
-              <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.22em] text-ash">
-                Imagen base (PNG/JPG/WebP/SVG · máx 4 MB)
-                <label className="mt-2 flex min-h-28 cursor-pointer flex-col items-center justify-center border border-dashed border-border bg-black/60 p-3 text-center text-[11px] transition-colors hover:border-terminal">
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                    className="sr-only"
-                    onChange={(e) => handleImage(e.target.files?.[0])}
-                  />
-                  {imagePreview ? (
-                    <>
-                      <img
-                        src={imagePreview}
-                        alt="preview"
-                        className="mb-2 h-20 max-w-full object-contain"
-                      />
-                      <span className="text-terminal">{imageFile?.name}</span>
-                      <span>{Math.ceil((imageFile?.size ?? 0) / 1024)} KB · listo</span>
-                    </>
-                  ) : (
-                    <span>Arrastra o haz click para adjuntar tu imagen base</span>
-                  )}
-                </label>
-              </div>
+              <label className="block border border-dashed border-border p-3">
+                <input ref={fileInputRef} type="file" className="sr-only" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={(e)=>handleImage(e.target.files?.[0])} />
+                <span className="font-mono text-xs">Subir imagen base</span>
+                {imagePreview && <img src={imagePreview} alt="preview" className="mt-2 h-20" />}
+              </label>
             )}
-
-            <label className="mt-4 block font-mono text-[10px] uppercase tracking-[0.22em] text-ash">
-              Contacto (email / WhatsApp / handle)
-              <input
-                value={contact}
-                onChange={(e) => setContact(e.target.value)}
-                maxLength={200}
-                className="mt-2 w-full border border-border bg-black/60 p-3 text-sm normal-case tracking-normal text-bone outline-none transition-colors focus:border-terminal"
-                placeholder="anubis@tamv.network"
-              />
-            </label>
-
-            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
-              <span>
-                hash: <span className="text-terminal">{hash ?? "—"}</span>
-              </span>
-              <span>motor: lovable AI · stripe</span>
-            </div>
-
-            <button
-              onClick={onForge}
-              disabled={!canForge || forging}
-              className="btn-blood mt-5 w-full disabled:opacity-40"
-            >
-              {forging ? "▮▯▮▯ FORJANDO CANDIDATOS..." : "⸸ GENERAR CANDIDATOS"}
-            </button>
-            {error && (
-              <p className="mt-3 border-l-2 border-blood pl-3 font-mono text-[11px] text-blood-glow">
-                {error}
-              </p>
-            )}
+            <input value={contact} onChange={(e)=>setContact(e.target.value)} placeholder="contacto" className="w-full bg-black/60 border border-border p-3" />
+            <div className="font-mono text-xs text-ash">Hash: {hash ?? "—"}</div>
+            <button onClick={onForge} disabled={!canForge || forging} className="btn-blood w-full">{forging ? "FORJANDO..." : "GENERAR"}</button>
+            {error && <p className="text-red-400 text-xs font-mono">{error}</p>}
           </div>
-
-          {/* RIGHT: plan */}
-          <div className="panel relative p-5 md:p-6">
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <div className="font-mono text-[10px] uppercase tracking-[0.26em] text-ash">
-                // ELIGE TU CONFIGURACIÓN DE ATAQUE
-              </div>
-              <PlanSwitch selectedPlan={selectedPlan} onSelect={setSelectedPlan} />
+          <div className="panel p-5 space-y-4">
+            <div className="flex gap-2">
+              {(["single", "legion"] as const).map((plan)=><button key={plan} onClick={()=>setSelectedPlan(plan)} className="btn-ghost">{plan}</button>)}
             </div>
-
-            <div className="relative overflow-hidden rounded border border-border/70 bg-black/60 p-4">
-              <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_right,_rgba(255,0,60,0.18),_transparent_60%)]" />
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h3 className="font-display text-2xl font-bold uppercase tracking-tight text-bone">
-                    {selected.name}
-                  </h3>
-                  <p className="mt-1 font-mono text-xs text-muted-foreground">{selected.desc}</p>
-                </div>
-                <div className="text-right font-display text-3xl font-extrabold text-bone">
-                  {selected.price}
-                </div>
-              </div>
-              <p className="mt-3 font-mono text-[11px] text-terminal">{selected.delivery}</p>
-            </div>
-
-            <ul className="mt-4 grid gap-2 font-mono text-sm text-bone">
-              {selected.perks.map((perk) => (
-                <li key={perk} className="flex items-start gap-2">
-                  <span className="mt-0.5 text-blood-glow">▸</span>
-                  <span>{perk}</span>
-                </li>
-              ))}
-            </ul>
+            <h3 className="text-bone font-bold">{selected.name} · {selected.price}</h3>
+            <p className="text-ash text-sm">{selected.desc}</p>
+            <ul className="text-xs text-ash list-disc pl-4">{selected.perks.map((perk)=><li key={perk}>{perk}</li>)}</ul>
+            <p className="text-terminal text-xs">{selected.delivery}</p>
           </div>
         </div>
-
-        {/* CANDIDATES */}
         {candidates.length > 0 && (
-          <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
-            <div className="panel p-5 md:p-6">
-              <div className="mb-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.22em] text-ash">
-                <span>// candidatos.forjados · selecciona tu salida</span>
-                <span className="text-terminal">{candidates.length} activos</span>
-              </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                {candidates.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => onSelectSigil(c.id)}
-                    className={`group relative min-h-24 overflow-hidden border p-3 text-left font-mono text-sm text-bone transition-all ${
-                      selectedSigilId === c.id
+          <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+            <div className="panel p-5 grid gap-3 md:grid-cols-2">
+              {candidates.map((c)=> (
+                <button key={c.id} onClick={()=>onSelectSigil(c.id)} className="border border-border p-3 min-h-32">
+                  <div className="text-xs font-mono mb-2">#{c.idx + 1}</div>
+                  <div className="h-20"><SafeSigilRenderer content={c.content} isObfuscated={selectedSigilId !== c.id} /></div>
+                </button>
+              ))}
+            </div>
+            <div className="panel p-5 space-y-3">
+              <div className="aspect-square border border-border p-4">{selectedSigil ? <SafeSigilRenderer content={selectedSigil.content} /> : <div className="text-xs text-ash">Selecciona un candidato</div>}</div>
+              <button onClick={onCopy} className="btn-ghost w-full">{copied ? "Copiado" : "Copiar SVG"}</button>
+              <button onClick={onCheckout} disabled={loading || !selectedSigil} className="btn-blood w-full">{loading ? "Procesando..." : `Pagar ${selected.price}`}</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}

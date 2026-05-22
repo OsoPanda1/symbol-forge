@@ -38,93 +38,6 @@ const PLANS = [
 
 const DEFAULT_PROMPT = "legión jaguar de frontera";
 
-const INTRO_MESSAGE =
-  "Bienvenido a la linea que divide a los usuarios de los elegidos, presiona enter para abrir las firewalls de la biomatrix";
-
-async function requestMediaPermissions(): Promise<void> {
-  if (typeof window === "undefined" || !navigator.mediaDevices?.getUserMedia) return;
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-  stream.getTracks().forEach((track) => track.stop());
-}
-
-function CinematicIntro({ onFinish }: { onFinish: () => void }) {
-  const [typedText, setTypedText] = useState("");
-  const [isTypingDone, setIsTypingDone] = useState(false);
-  const [isOpening, setIsOpening] = useState(false);
-  const [permissionError, setPermissionError] = useState<string | null>(null);
-  const [showVideo, setShowVideo] = useState(false);
-
-  useEffect(() => {
-    let index = 0;
-    const timer = window.setInterval(() => {
-      index += 1;
-      setTypedText(INTRO_MESSAGE.slice(0, index));
-      if (index >= INTRO_MESSAGE.length) {
-        window.clearInterval(timer);
-        setIsTypingDone(true);
-      }
-    }, 35);
-    return () => window.clearInterval(timer);
-  }, []);
-
-  const handleEnter = async () => {
-    if (isOpening) return;
-    setPermissionError(null);
-    setIsOpening(true);
-    try {
-      await requestMediaPermissions();
-      setShowVideo(true);
-    } catch {
-      setPermissionError("No se concedieron permisos de audio/video. Puedes intentar nuevamente.");
-      setIsOpening(false);
-    }
-  };
-
-  return (
-    <section className="fixed inset-0 z-50 grid place-items-center bg-black p-6">
-      <div className="w-full max-w-4xl space-y-5 border border-red-900/50 bg-black/95 p-6 md:p-8">
-        {!showVideo ? (
-          <>
-            <div className="font-mono text-base text-red-400 md:text-lg">
-              {typedText}
-              <span className="animate-pulse">▌</span>
-            </div>
-            {isTypingDone && (
-              <div className="space-y-3">
-                <p className="font-mono text-xs text-ash">Se solicitarán permisos de audio y video para abrir la transmisión.</p>
-                <button
-                  type="button"
-                  onClick={handleEnter}
-                  disabled={isOpening}
-                  className="w-full border border-red-500 bg-red-700/80 px-6 py-3 font-mono text-sm font-bold uppercase tracking-[0.3em] text-bone shadow-[0_0_20px_rgba(255,0,50,0.45)] transition hover:bg-red-600 disabled:opacity-60"
-                >
-                  {isOpening ? "ABRIENDO..." : "ENTER"}
-                </button>
-                {permissionError && <p className="font-mono text-xs text-red-300">{permissionError}</p>}
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="space-y-4">
-            <div className="aspect-video overflow-hidden border border-red-900/50 bg-black">
-              <iframe
-                title="La Biomatrix ha sido tomada"
-                src="https://www.youtube.com/embed/aRgsTqreA_w?start=2&autoplay=1&rel=0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="h-full w-full"
-              />
-            </div>
-            <button type="button" onClick={onFinish} className="btn-blood w-full">
-              Continuar a la plataforma
-            </button>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
-
 const playSynthTone = (freq = 800, duration = 0.08) => {
   if (typeof window === "undefined") return;
   try {
@@ -298,7 +211,17 @@ export default function AlphaForge() {
 
   const selectedSigil = useMemo(() => candidates.find((c) => c.id === selectedSigilId), [candidates, selectedSigilId]);
 
-  if (!isUnlocked) return <CinematicIntro onFinish={() => setIsUnlocked(true)} />;
+  if (!isUnlocked) {
+    return (
+      <section className="min-h-screen grid place-items-center bg-black p-6">
+        <div className="max-w-xl border border-red-900/40 bg-black/80 p-6 text-center space-y-4 rounded">
+          <h2 className="text-red-400 font-display text-3xl uppercase">AlphaForge · acceso</h2>
+          <p className="text-ash font-mono text-sm">Zona de creación soberana: genera símbolos únicos en modo texto o imagen con validación y checkout seguro.</p>
+          <button className="btn-blood" onClick={() => setIsUnlocked(true)}>Ingresar a la forja</button>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="forge" className="relative z-10 overflow-hidden px-4 py-24">

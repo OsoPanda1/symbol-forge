@@ -195,4 +195,57 @@ export const forgeImage = createServerFn({ method: "POST" })
         image_path: path,
       })
       .select()
-      .
+      .single();
+
+    if (orderErr || !order) throw new Error(orderErr?.message ?? "No se pudo crear la orden");
+
+    const candidates = await buildCandidates(data.prompt, data.plan);
+
+    const { data: sigils, error: sigilsErr } = await supabaseAdmin
+      .from("sigils")
+      .insert(
+        candidates.map((c, i) => ({
+          order_id: order.id,
+          idx: i,
+          content: c.content,
+          style_id: c.styleId,
+        })),
+      )
+      .select();
+
+    if (sigilsErr) throw new Error(sigilsErr.message);
+
+    return { orderId: order.id, hash, sigils: sigils ?? [] };
+  });
+
+// ---------- SELECT SIGIL ----------
+export const selectSigil = createServerFn({ method: "POST" })
+  .inputValidator((input) =>
+    z.object({ orderId: z.string().uuid(), sigilId: z.string().uuid() }).parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { error } = await supabaseAdmin
+      .from("orders")
+      .update({ selected_sigil_id: data.sigilId })
+      .eq("id", data.orderId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ---------- GET ORDER STATUS ----------
+export const getOrderStatus = createServerFn({ method: "GET" })
+  .inputValidator((input) => z.object({ orderId: z.string().uuid() }).parse(input))
+  .handler(async ({ data }) => {
+    const { data: order } = await supabaseAdmin
+      .from("orders")
+      .select("id, status, selected_sigil_id, plan, hash")
+      .eq("id", data.orderId)
+      .single();
+    if (!order) return null;
+    const { data: sigils } = await supabaseAdmin
+      .from("sigils")
+      .select("id, idx, content, style_id, released")
+      .eq("order_id", data.orderId)
+      .order("idx");
+    return { order, sigils: sigils ?? [] };
+  });

@@ -44,7 +44,7 @@ function Index() {
       <MatrixRain />
 
       <div className="relative z-10">
-        <TopStatusBar />
+        <TopStatusBar accessLevel="GUEST" currentModule="ALPHA_FORGE" />
         <Hero onStartFree={() => scrollTo("aesthetics")} onStartAlpha={() => scrollTo("forge")} />
         <SymbolNoiseBand />
         <AestheticsGenerator />

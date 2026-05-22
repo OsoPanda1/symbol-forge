@@ -14,7 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      orders: {
+        Row: {
+          amount_mxn: number
+          contact: string
+          created_at: string
+          hash: string
+          id: string
+          image_path: string | null
+          mode: string
+          paid_at: string | null
+          plan: string
+          prompt: string
+          selected_sigil_id: string | null
+          status: string
+          stripe_session_id: string | null
+        }
+        Insert: {
+          amount_mxn: number
+          contact: string
+          created_at?: string
+          hash: string
+          id?: string
+          image_path?: string | null
+          mode: string
+          paid_at?: string | null
+          plan: string
+          prompt: string
+          selected_sigil_id?: string | null
+          status?: string
+          stripe_session_id?: string | null
+        }
+        Update: {
+          amount_mxn?: number
+          contact?: string
+          created_at?: string
+          hash?: string
+          id?: string
+          image_path?: string | null
+          mode?: string
+          paid_at?: string | null
+          plan?: string
+          prompt?: string
+          selected_sigil_id?: string | null
+          status?: string
+          stripe_session_id?: string | null
+        }
+        Relationships: []
+      }
+      sigils: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          idx: number
+          order_id: string
+          released: boolean
+          style_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          idx: number
+          order_id: string
+          released?: boolean
+          style_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          idx?: number
+          order_id?: string
+          released?: boolean
+          style_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sigils_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

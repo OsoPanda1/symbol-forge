@@ -46,35 +46,27 @@ const superscript = buildMap(A, "ᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖ�
 const subscript = buildMap(A, "ₐᵦ𝒸𝒹ₑ𝒻𝓰ₕᵢⱼₖₗₘₙₒₚ𝓆ᵣₛₜᵤᵥ𝓌ₓᵧ𝓏");
 const cursed = (t: string) => {
   const marks = [
-    "\u0300",
-    "\u0301",
-    "\u0302",
-    "\u0303",
-    "\u0304",
-    "\u0306",
-    "\u0307",
-    "\u0308",
-    "\u030A",
-    "\u030B",
-    "\u030C",
-    "\u0327",
-    "\u0328",
-    "\u0334",
-    "\u0335",
-    "\u0336",
-    "\u0337",
-    "\u0338",
+    "\u0300","\u0301","\u0302","\u0303","\u0304","\u0306","\u0307","\u0308",
+    "\u030A","\u030B","\u030C","\u0327","\u0328","\u0334","\u0335","\u0336","\u0337","\u0338",
   ];
+  // Deterministic seeded pseudo-random — avoids SSR/CSR hydration mismatch.
+  let seed = 0;
+  for (let i = 0; i < t.length; i++) seed = (seed * 31 + t.charCodeAt(i)) >>> 0;
+  const rand = () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 0xffffffff;
+  };
   return [...t]
     .map((c) => {
       if (c === " ") return c;
       let out = c;
-      const n = 3 + Math.floor(Math.random() * 5);
-      for (let i = 0; i < n; i++) out += marks[Math.floor(Math.random() * marks.length)];
+      const n = 3 + Math.floor(rand() * 5);
+      for (let i = 0; i < n; i++) out += marks[Math.floor(rand() * marks.length)];
       return out;
     })
     .join("");
 };
+
 
 const wrap = (t: string, l: string, r: string, sep = " ") => `${l}${sep}${t}${sep}${r}`;
 

@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as LandingRouteImport } from './routes/landing'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ForgeSuccessRouteImport } from './routes/forge.success'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
+import { Route as ApiPublicFeaturesTreeRouteImport } from './routes/api/public/features-tree'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -23,6 +25,11 @@ const SignupRoute = SignupRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingRoute = LandingRouteImport.update({
+  id: '/landing',
+  path: '/landing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -40,58 +47,77 @@ const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   path: '/api/public/stripe-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicFeaturesTreeRoute = ApiPublicFeaturesTreeRouteImport.update({
+  id: '/api/public/features-tree',
+  path: '/api/public/features-tree',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/forge/success': typeof ForgeSuccessRoute
+  '/api/public/features-tree': typeof ApiPublicFeaturesTreeRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/forge/success': typeof ForgeSuccessRoute
+  '/api/public/features-tree': typeof ApiPublicFeaturesTreeRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/forge/success': typeof ForgeSuccessRoute
+  '/api/public/features-tree': typeof ApiPublicFeaturesTreeRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/landing'
     | '/login'
     | '/signup'
     | '/forge/success'
+    | '/api/public/features-tree'
     | '/api/public/stripe-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/landing'
     | '/login'
     | '/signup'
     | '/forge/success'
+    | '/api/public/features-tree'
     | '/api/public/stripe-webhook'
   id:
     | '__root__'
     | '/'
+    | '/landing'
     | '/login'
     | '/signup'
     | '/forge/success'
+    | '/api/public/features-tree'
     | '/api/public/stripe-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LandingRoute: typeof LandingRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   ForgeSuccessRoute: typeof ForgeSuccessRoute
+  ApiPublicFeaturesTreeRoute: typeof ApiPublicFeaturesTreeRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
 }
 
@@ -109,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing': {
+      id: '/landing'
+      path: '/landing'
+      fullPath: '/landing'
+      preLoaderRoute: typeof LandingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -132,14 +165,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/features-tree': {
+      id: '/api/public/features-tree'
+      path: '/api/public/features-tree'
+      fullPath: '/api/public/features-tree'
+      preLoaderRoute: typeof ApiPublicFeaturesTreeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LandingRoute: LandingRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   ForgeSuccessRoute: ForgeSuccessRoute,
+  ApiPublicFeaturesTreeRoute: ApiPublicFeaturesTreeRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport

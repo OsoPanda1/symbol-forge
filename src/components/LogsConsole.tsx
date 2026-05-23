@@ -13,21 +13,29 @@ const MESSAGES = [
 
 export default function LogsConsole() {
   const [lines, setLines] = useState<{ id: number; t: string; c: string; m: string }[]>([]);
+  const [page, setPage] = useState(1);
+  const pageSize = 4;
 
   useEffect(() => {
     let id = 0;
     const tick = () => {
       const msg = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
       id++;
-      setLines((prev) => [...prev.slice(-4), { id, ...msg }]);
+      setLines((prev) => [...prev.slice(-49), { id, ...msg }]);
     };
     tick();
     const i = setInterval(tick, 3200);
     return () => clearInterval(i);
   }, []);
 
+  const totalPages = Math.max(1, Math.ceil(lines.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const start = Math.max(0, lines.length - safePage * pageSize);
+  const end = lines.length - (safePage - 1) * pageSize;
+  const visible = lines.slice(start, end);
+
   return (
-    <div className="pointer-events-none fixed bottom-3 left-3 z-40 hidden w-[380px] md:block">
+    <div className="fixed bottom-3 left-3 z-40 hidden w-[380px] md:block">
       <div className="border border-border bg-background/90 backdrop-blur">
         <div className="flex items-center justify-between border-b border-border px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest">
           <span className="text-terminal">▸ tamv.log · live</span>
@@ -37,7 +45,7 @@ export default function LogsConsole() {
           </span>
         </div>
         <div className="space-y-1 px-3 py-2 font-mono text-[11px] leading-relaxed">
-          {lines.map((l) => (
+          {visible.map((l) => (
             <div key={l.id} className="flex gap-2">
               <span
                 className={
@@ -53,6 +61,29 @@ export default function LogsConsole() {
               <span className="text-muted-foreground">{l.m}</span>
             </div>
           ))}
+        </div>
+        <div className="flex items-center justify-between border-t border-border px-3 py-1.5 font-mono text-[10px] text-ash">
+          <span>
+            pág {safePage}/{totalPages}
+          </span>
+          <div className="pointer-events-auto flex gap-2">
+            <button
+              type="button"
+              className="text-terminal disabled:opacity-40"
+              disabled={safePage >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            >
+              anteriores
+            </button>
+            <button
+              type="button"
+              className="text-terminal disabled:opacity-40"
+              disabled={safePage <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              recientes
+            </button>
+          </div>
         </div>
       </div>
     </div>

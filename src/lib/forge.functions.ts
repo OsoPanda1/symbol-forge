@@ -143,8 +143,8 @@ export const forgeText = createServerFn({ method: "POST" })
       recentAttempts: 0,
     });
     if (risk.blocked) {
-      await incrementMetric("abuse.blocked", 1, { flow: "forge-text" });
-      await logEvent("warn", "forge_text_blocked", { reasons: risk.reasons, score: risk.score });
+      await incrementMetric("abuse.blocked", 1, { flow: "forge-image" });
+      await logEvent("warn", "forge_image_blocked", { reasons: risk.reasons, score: risk.score });
       throw new Error("Solicitud bloqueada por controles antiabuso");
     }
     const amount = data.plan === "legion" ? 15000 : 3000; // centavos MXN

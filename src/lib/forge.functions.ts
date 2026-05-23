@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { STYLES } from "@/lib/aesthetics";
-import { assertRateLimit, cleanTextInput, makeRateLimitKey, sanitizeSvg } from "@/lib/security";
+import { assertIpReputation, assertRateLimit, cleanTextInput, makeRateLimitKey, sanitizeSvg } from "@/lib/security";
 import { getRequest } from "@tanstack/react-start/server";
 import { fraudScore } from "@/lib/antifraud";
 import { logEvent, incrementMetric } from "@/lib/observability";
@@ -84,6 +84,16 @@ function deterministicCandidates(prompt: string, count: number): { content: stri
   });
 }
 
+
+function candidateScore(content: string, prompt: string): number {
+  const normalized = content.toLowerCase();
+  const promptTerms = prompt.toLowerCase().split(/\s+/).filter(Boolean);
+  const promptHits = promptTerms.filter((term) => normalized.includes(term)).length;
+  const uniqueChars = new Set(content).size;
+  const lengthPenalty = content.length > 90 ? 0.2 : 1;
+  return promptHits * 0.55 + Math.min(uniqueChars / 60, 1) * 0.45 * lengthPenalty;
+}
+
 async function buildCandidates(prompt: string, plan: "single" | "legion") {
   const total = plan === "legion" ? 10 : 4;
   const aiCount = Math.min(total, plan === "legion" ? 6 : 3);
@@ -99,7 +109,10 @@ async function buildCandidates(prompt: string, plan: "single" | "legion") {
       merged.push(deterministic[i]);
     }
   }
-  return merged;
+  return merged
+    .map((item) => ({ ...item, score: candidateScore(item.content, prompt) }))
+    .sort((a, b) => b.score - a.score)
+    .map(({ content, styleId }) => ({ content, styleId }));
 }
 
 // ---------- TEXT FORGE ----------
@@ -115,7 +128,10 @@ export const forgeText = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const request = getRequest();
-    if (request) assertRateLimit(makeRateLimitKey("forge-text", request));
+    if (request) {
+      await assertIpReputation(request);
+      await assertRateLimit(makeRateLimitKey("forge-text", request));
+    }
     const prompt = cleanTextInput(data.prompt);
     const contact = cleanTextInput(data.contact);
     const risk = fraudScore({
@@ -201,7 +217,10 @@ export const forgeImage = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const request = getRequest();
-    if (request) assertRateLimit(makeRateLimitKey("forge-image", request));
+    if (request) {
+      await assertIpReputation(request);
+      await assertRateLimit(makeRateLimitKey("forge-image", request));
+    }
     const prompt = cleanTextInput(data.prompt);
     const contact = cleanTextInput(data.contact);
     const risk = fraudScore({
@@ -213,8 +232,8 @@ export const forgeImage = createServerFn({ method: "POST" })
       recentAttempts: 0,
     });
     if (risk.blocked) {
-      await incrementMetric("abuse.blocked", 1, { flow: "forge-text" });
-      await logEvent("warn", "forge_text_blocked", { reasons: risk.reasons, score: risk.score });
+      await incrementMetric("abuse.blocked", 1, { flow: "forge-image" });
+      await logEvent("warn", "forge_image_blocked", { reasons: risk.reasons, score: risk.score });
       throw new Error("Solicitud bloqueada por controles antiabuso");
     }
     const { mime, bytes } = parseDataUrl(data.imageDataUrl);
@@ -271,7 +290,7 @@ export const selectSigil = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const request = getRequest();
-    if (request) assertRateLimit(makeRateLimitKey("select-sigil", request));
+    if (request) await assertRateLimit(makeRateLimitKey("select-sigil", request));
     const { error } = await supabaseAdmin
       .from("orders")
       .update({ selected_sigil_id: data.sigilId })
@@ -285,7 +304,7 @@ export const getOrderStatus = createServerFn({ method: "GET" })
   .inputValidator((input) => z.object({ orderId: z.string().uuid() }).parse(input))
   .handler(async ({ data }) => {
     const request = getRequest();
-    if (request) assertRateLimit(makeRateLimitKey("order-status", request));
+    if (request) await assertRateLimit(makeRateLimitKey("order-status", request));
     const { data: order } = await supabaseAdmin
       .from("orders")
       .select("id, status, selected_sigil_id, plan, hash")

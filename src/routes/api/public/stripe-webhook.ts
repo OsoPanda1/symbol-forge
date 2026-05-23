@@ -1,6 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Stripe from "stripe";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { enqueueJob } from "@/lib/queue.functions";
+import { logEvent, incrementMetric } from "@/lib/observability";
+import { appendOwnershipEvent } from "@/lib/ownership-ledger";
+import { buildSymbolicDNA } from "@/lib/symbolic-dna";
 
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -37,6 +41,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
           .maybeSingle();
 
         if (alreadyProcessed) {
+          await incrementMetric("stripe.webhook.duplicate", 1, { type: event.type });
           return new Response(JSON.stringify({ received: true, duplicate: true }), {
             status: 200,
             headers: { "content-type": "application/json" },
@@ -44,6 +49,7 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
         }
 
         await supabaseAdmin.from("webhook_events").insert({ id: event.id, type: event.type });
+        await incrementMetric("stripe.webhook.received", 1, { type: event.type });
 
         if (event.type === "checkout.session.completed") {
           const session = event.data.object as Stripe.Checkout.Session;
@@ -53,14 +59,14 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
               .from("orders")
               .update({ status: "paid", paid_at: new Date().toISOString() })
               .eq("id", orderId)
-              .select("id, contact")
+              .select("id, contact, prompt")
               .single();
             // Release all sigils for this order and map them into private PUA symbols.
             const { data: releasedSigils } = await supabaseAdmin
               .from("sigils")
               .update({ released: true })
               .eq("order_id", orderId)
-              .select("id, idx");
+              .select("id, idx, style_id, content");
 
             if (releasedSigils?.length) {
               const { data: baseCollection } = await supabaseAdmin
@@ -83,13 +89,29 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
                   .single();
 
                 if (symbol?.id && order?.contact) {
+                  const dna = buildSymbolicDNA({
+                    prompt: order.prompt,
+                    styleId: sigil.style_id ?? undefined,
+                    sigilContent: sigil.content,
+                  });
+
                   await supabaseAdmin.from("user_unlocks").upsert({
                     user_key: String(order.contact).toLowerCase(),
                     symbol_id: symbol.id,
                   }, { onConflict: "user_key,symbol_id" });
+
+                  await appendOwnershipEvent({
+                    symbolId: symbol.id,
+                    ownerKey: String(order.contact),
+                    eventType: "unlocked",
+                    sourceRef: event.id,
+                    metadata: { dnaHash: dna.dnaHash, entropy: dna.entropy, signature: dna.signature },
+                  });
                 }
               }
             }
+            await enqueueJob("fulfillment.email", { orderId, contact: order?.contact, eventId: event.id });
+            await logEvent("info", "checkout.session.completed", { orderId, eventId: event.id });
           }
         } else if (event.type === "checkout.session.expired") {
           const session = event.data.object as Stripe.Checkout.Session;

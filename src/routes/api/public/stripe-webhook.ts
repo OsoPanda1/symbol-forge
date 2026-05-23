@@ -5,6 +5,7 @@ import { enqueueJob } from "@/lib/queue.functions";
 import { logEvent, incrementMetric } from "@/lib/observability";
 import { appendOwnershipEvent } from "@/lib/ownership-ledger";
 import { buildSymbolicDNA } from "@/lib/symbolic-dna";
+import { createLedgerTransaction } from "@/lib/ledger.functions";
 
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -111,6 +112,40 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
               }
             }
             await enqueueJob("fulfillment.email", { orderId, contact: order?.contact, eventId: event.id });
+            if (orderId && session.payment_intent) {
+              try {
+                const amountTotal = Number(session.amount_total ?? 0) / 100;
+                const currency = String(session.currency ?? "mxn").toUpperCase();
+                await createLedgerTransaction({
+                  stripePaymentIntent: String(session.payment_intent),
+                  orderId,
+                  kind: "symbol_purchase",
+                  entries: [
+                    {
+                      accountExternalRef: String(order?.contact ?? "anonymous"),
+                      accountType: "user",
+                      direction: "debit",
+                      amount: amountTotal,
+                      currency,
+                    },
+                    {
+                      accountExternalRef: "system:revenue",
+                      accountType: "system",
+                      direction: "credit",
+                      amount: amountTotal,
+                      currency,
+                    },
+                  ],
+                  metadata: { stripe_event_id: event.id, session_id: session.id },
+                });
+              } catch (ledgerErr) {
+                await logEvent("error", "ledger.record_failed", {
+                  orderId,
+                  eventId: event.id,
+                  message: ledgerErr instanceof Error ? ledgerErr.message : "unknown",
+                });
+              }
+            }
             await logEvent("info", "checkout.session.completed", { orderId, eventId: event.id });
           }
         } else if (event.type === "checkout.session.expired") {

@@ -7,6 +7,8 @@ import AestheticsGenerator from "@/components/AestheticsGenerator";
 import AlphaForge from "@/components/AlphaForge";
 import LogsConsole from "@/components/LogsConsole";
 import Footer from "@/components/Footer";
+import CinematicIntro from "@/components/CinematicIntro";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,6 +37,8 @@ function Index() {
 
   return (
     <div className="scanlines relative min-h-screen overflow-hidden bg-background">
+      <CinematicIntro />
+
       {/* Deep gradient backdrop */}
       <div
         className="pointer-events-none fixed inset-0"

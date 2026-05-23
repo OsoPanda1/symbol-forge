@@ -417,6 +417,121 @@
   border-right: 2px solid var(--blood);
 }
 
+/* ============================
+   ALPHA FORGE · IMMERSION FX
+   ============================ */
+
+@keyframes ember-rise {
+  0%   { transform: translate3d(0, 0, 0) scale(0.6); opacity: 0; }
+  10%  { opacity: 0.9; }
+  100% { transform: translate3d(var(--dx, 0px), -120vh, 0) scale(1.2); opacity: 0; }
+}
+
+.ember {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: radial-gradient(circle, var(--blood-glow) 0%, transparent 70%);
+  box-shadow: 0 0 12px var(--blood-glow);
+  animation: ember-rise linear infinite;
+  pointer-events: none;
+  filter: blur(0.4px);
+}
+
+@keyframes ring-pulse {
+  0%   { transform: scale(0.85); opacity: 0.9; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
+.forge-ring {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--blood);
+  border-radius: 9999px;
+  animation: ring-pulse 3.2s ease-out infinite;
+  box-shadow: 0 0 60px oklch(0.58 0.28 25 / 0.4) inset;
+}
+
+@keyframes sheen {
+  0%   { transform: translateX(-120%) skewX(-12deg); }
+  100% { transform: translateX(220%)  skewX(-12deg); }
+}
+.sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, oklch(1 0 0 / 0.18) 50%, transparent 100%);
+  animation: sheen 3.5s ease-in-out infinite;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+@keyframes glow-orbit {
+  0%   { box-shadow: 0 0 40px var(--blood), inset 0 0 40px oklch(0.58 0.28 25 / 0.35); }
+  50%  { box-shadow: 0 0 90px var(--terminal), inset 0 0 60px oklch(0.78 0.2 150 / 0.35); }
+  100% { box-shadow: 0 0 40px var(--blood), inset 0 0 40px oklch(0.58 0.28 25 / 0.35); }
+}
+.forge-core {
+  animation: glow-orbit 5.5s ease-in-out infinite;
+}
+
+@keyframes scan-bar {
+  0%   { transform: translateY(-100%); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translateY(2200%); opacity: 0; }
+}
+.scan-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--terminal), transparent);
+  box-shadow: 0 0 16px var(--terminal);
+  animation: scan-bar 4.2s linear infinite;
+  pointer-events: none;
+}
+
+.candidate-card {
+  position: relative;
+  isolation: isolate;
+  transition: transform 0.25s ease, border-color 0.2s ease, box-shadow 0.3s ease;
+}
+.candidate-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg, var(--blood) 0%, transparent 35%, var(--terminal) 100%);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.25s ease;
+}
+.candidate-card:hover { transform: translateY(-2px) scale(1.01); }
+.candidate-card:hover::before { opacity: 0.45; }
+.candidate-card[data-selected="true"] {
+  border-color: var(--blood-glow) !important;
+  box-shadow: 0 0 0 1px var(--blood-glow), 0 0 30px oklch(0.7 0.3 25 / 0.35);
+}
+.candidate-card[data-selected="true"]::before { opacity: 0.85; }
+
+@keyframes ascii-flicker {
+  0%, 100% { opacity: 0.18; }
+  50%      { opacity: 0.45; }
+}
+.ascii-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.05;
+  color: var(--terminal);
+  white-space: pre;
+  overflow: hidden;
+  mix-blend-mode: screen;
+  animation: ascii-flicker 6s ease-in-out infinite;
+}
+
+
 /* Badge tipo "deep web" */
 .badge-alpha {
   display: inline-flex;

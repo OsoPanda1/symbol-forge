@@ -4,6 +4,8 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { STYLES } from "@/lib/aesthetics";
 import { assertRateLimit, cleanTextInput, makeRateLimitKey, sanitizeSvg } from "@/lib/security";
 import { getRequest } from "@tanstack/react-start/server";
+import { fraudScore } from "@/lib/antifraud";
+import { logEvent, incrementMetric } from "@/lib/observability";
 
 const INTENTS = ["memoria", "frontera", "legión", "sombra", "fuego", "nodo", "resistencia", "fractura", "umbral"];
 
@@ -112,6 +114,19 @@ export const forgeText = createServerFn({ method: "POST" })
     if (request) assertRateLimit(makeRateLimitKey("forge-text", request));
     const prompt = cleanTextInput(data.prompt);
     const contact = cleanTextInput(data.contact);
+    const risk = fraudScore({
+      email: contact,
+      amountMxn: data.plan === "legion" ? 150000 : 30000,
+      prompt,
+      ip: request ? (request.headers.get("x-forwarded-for") ?? "unknown") : "unknown",
+      userAgent: request?.headers.get("user-agent") ?? "unknown",
+      recentAttempts: 0,
+    });
+    if (risk.blocked) {
+      await incrementMetric("abuse.blocked", 1, { flow: "forge-text" });
+      await logEvent("warn", "forge_text_blocked", { reasons: risk.reasons, score: risk.score });
+      throw new Error("Solicitud bloqueada por controles antiabuso");
+    }
     const amount = data.plan === "legion" ? 15000 : 3000; // centavos MXN
     const hash = forgeHash(`${data.plan}|text|${prompt}|${Date.now()}`);
 
@@ -185,6 +200,19 @@ export const forgeImage = createServerFn({ method: "POST" })
     if (request) assertRateLimit(makeRateLimitKey("forge-image", request));
     const prompt = cleanTextInput(data.prompt);
     const contact = cleanTextInput(data.contact);
+    const risk = fraudScore({
+      email: contact,
+      amountMxn: data.plan === "legion" ? 150000 : 30000,
+      prompt,
+      ip: request ? (request.headers.get("x-forwarded-for") ?? "unknown") : "unknown",
+      userAgent: request?.headers.get("user-agent") ?? "unknown",
+      recentAttempts: 0,
+    });
+    if (risk.blocked) {
+      await incrementMetric("abuse.blocked", 1, { flow: "forge-text" });
+      await logEvent("warn", "forge_text_blocked", { reasons: risk.reasons, score: risk.score });
+      throw new Error("Solicitud bloqueada por controles antiabuso");
+    }
     const { mime, bytes } = parseDataUrl(data.imageDataUrl);
     const ext = mime.split("/")[1].replace("+xml", "");
     const amount = data.plan === "legion" ? 15000 : 3000;

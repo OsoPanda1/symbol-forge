@@ -14,6 +14,39 @@ import appCss from "../styles.css?url";
 import OptimizedVideo from "@/components/OptimizedVideo";
 import shellBg from "@/assets/96756-657131767.mp4";
 
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      name: "The Alpha Red Hat",
+      alternateName: "Symbol Forge",
+      url: "https://anubis-legions.lovablle.app",
+      logo: "https://anubis-legions.lovablle.app/logo.png",
+      sameAs: ["https://x.com/TAMV_Online"],
+      description:
+        "Servicio de identidad simbólica y generación de sigilos con enfoque cinematográfico e inmersivo.",
+    },
+    {
+      "@type": "WebSite",
+      name: "Symbol Forge",
+      url: "https://anubis-legions.lovablle.app",
+      description:
+        "Plataforma de generación simbólica, experimentación visual y forja procedural de identidades.",
+      inLanguage: "es",
+      publisher: {
+        "@type": "Organization",
+        name: "The Alpha Red Hat",
+      },
+      potentialAction: {
+        "@type": "SearchAction",
+        target: "https://anubis-legions.lovablle.app/?q={search_term_string}",
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
+};
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -117,6 +150,7 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="es">
       <head>
         <HeadContent />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       </head>
       <body className="bg-background text-foreground">
         {/* Capa de video global: se activa en idle y respeta ahorro de datos/movimiento. */}

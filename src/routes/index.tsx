@@ -8,6 +8,7 @@ import AlphaForge from "@/components/AlphaForge";
 import LogsConsole from "@/components/LogsConsole";
 import Footer from "@/components/Footer";
 import CinematicIntro from "@/components/CinematicIntro";
+import AuthPanel from "@/components/AuthPanel";
 
 
 export const Route = createFileRoute("/")({
@@ -50,6 +51,7 @@ function Index() {
       <div className="relative z-10">
         <TopStatusBar accessLevel="GUEST" currentModule="ALPHA_FORGE" />
         <Hero onStartFree={() => scrollTo("aesthetics")} onStartAlpha={() => scrollTo("forge")} />
+        <AuthPanel />
         <SymbolNoiseBand />
         <AestheticsGenerator />
         <AlphaForge />

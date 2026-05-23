@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { forgeText, forgeImage, selectSigil, getOrderStatus } from "@/lib/forge.functions";
+import { renderSymbolAccess } from "@/lib/symbol.functions";
 import { createCheckoutSession } from "@/lib/stripe.functions";
 import OptimizedVideo from "@/components/OptimizedVideo";
 import forgeBg from "@/assets/100993-657759886_medium.mp4";
@@ -188,6 +189,7 @@ export default function AlphaForge() {
   const selectSigilFn = useServerFn(selectSigil);
   const getOrderStatusFn = useServerFn(getOrderStatus);
   const checkoutFn = useServerFn(createCheckoutSession);
+  const renderSymbolAccessFn = useServerFn(renderSymbolAccess);
 
   const [selectedPlan, setSelectedPlan] = useState<PlanId>("legion");
   const [mode, setMode] = useState<ForgeMode>("text");
@@ -204,6 +206,7 @@ export default function AlphaForge() {
   const [candidates, setCandidates] = useState<SigilCandidate[]>([]);
   const [selectedSigilId, setSelectedSigilId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [symbolAccess, setSymbolAccess] = useState<{ status: "locked" | "unlocked"; puaHex?: string } | null>(null);
   const [orderStatus, setOrderStatus] = useState<string>("pending");
   const [statusLoading, setStatusLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -330,12 +333,36 @@ export default function AlphaForge() {
   const onCopy = async () => {
     if (!selectedSigil || !isPaid) return;
     try {
-      await navigator.clipboard.writeText(selectedSigil.content);
+      const access = await renderSymbolAccessFn({ data: { sigilId: selectedSigil.id } });
+      setSymbolAccess(access);
+      if (access.status !== "unlocked") {
+        setError("Este símbolo está bloqueado para tu identidad. Inicia sesión con el contacto de compra.");
+        return;
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 1024;
+      canvas.height = 1024;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("No se pudo renderizar el asset.");
+
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#f6f6f6";
+      ctx.font = "600 76px JetBrains Mono, monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(selectedSigil.content, canvas.width / 2, canvas.height / 2, canvas.width - 120);
+
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = `sigil-${selectedSigil.idx + 1}.png`;
+      link.click();
       setCopied(true);
       playSynthTone(1500);
       setTimeout(() => setCopied(false), 1400);
     } catch {
-      setError("No fue posible copiar en el portapapeles.");
+      setError("No fue posible exportar el asset.");
     }
   };
 
@@ -578,8 +605,13 @@ export default function AlphaForge() {
                 className="btn-ghost mt-3 w-full"
                 title={isPaid ? "Copiar al portapapeles" : "Disponible tras pago"}
               >
-                {copied ? "✓ copiado" : isPaid ? "copiar sigilo" : "🔒 copia bloqueada"}
+                {copied ? "✓ asset descargado" : isPaid ? "descargar asset (png)" : "🔒 descarga bloqueada"}
               </button>
+              {symbolAccess?.status === "unlocked" && symbolAccess.puaHex ? (
+                <div className="mt-2 font-mono text-[9px] uppercase tracking-[0.2em] text-terminal">
+                  pua unlock · U+{symbolAccess.puaHex.toUpperCase()}
+                </div>
+              ) : null}
               <button
                 onClick={onCheckout}
                 disabled={loading || !selectedSigil || isPaid}

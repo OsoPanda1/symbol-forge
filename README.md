@@ -1,269 +1,126 @@
 # RDM Digital / Symbol Forge
-## Sistema Operativo Territorial (SOT) — Análisis Total + Guía de Implementación
 
-> Estado del repositorio: **TanStack Start + React + Supabase + Stripe** con experiencia inmersiva de forja simbólica.
->
-> Objetivo estratégico: evolucionar hacia un **SOT desplegable globalmente** (infraestructura + identidad + economía + IA + gobernanza + experiencia).
+Sistema de **forja simbólica** con economía digital, pagos Stripe y trazabilidad operativa sobre Supabase.
 
----
+## ¿Qué es este proyecto?
 
-## 1) Resumen ejecutivo
+RDM Digital (Symbol Forge) es una plataforma que combina:
 
-Este proyecto ya opera como núcleo visual y transaccional de una plataforma de identidad simbólica:
-
-- Frontend inmersivo con módulos de generación visual/simbólica.
-- Integración de pagos con Stripe (checkout/webhook).
-- Integración con Supabase (auth + persistencia).
-- Señales SEO mejoradas con schema JSON-LD para rich results.
-
-La expansión planteada en tu documento (Open Symbolic Network, embeddings vectoriales, genealogía simbólica, pipeline IA multicapa, visualización reactiva/3D, etc.) es viable si se estructura en fases de hardening + escalamiento.
+- **Experiencia visual inmersiva** (narrativa/cinemática + UI temática).
+- **Forja de símbolos** (texto e imagen) con pipeline determinista + apoyo de IA.
+- **Motor económico transaccional** (órdenes, sigils, desbloqueos, ownership ledger).
+- **Integración de pagos reales con Stripe** (checkout + webhook firmado + idempotencia).
+- **Base de observabilidad y antiabuso** (logs, métricas, rate-limit y señales antifraude).
 
 ---
 
-## 2) Arquitectura actual del repo (real)
+## Estado actual (implementado)
 
-Estructura principal observada:
+### Frontend
+- Página principal inmersiva con módulos de forja y autenticación.
+- Consola operativa “tamv.log” en vivo con historial paginado de eventos visuales.
 
-- `src/routes/*`: rutas de aplicación (TanStack Router).
-- `src/components/*`: UI inmersiva (Hero, AlphaForge, MatrixRain, etc.).
-- `src/lib/forge.functions.ts`: funciones de forja y selección.
-- `src/lib/stripe.functions.ts`: funciones de Stripe checkout.
-- `src/routes/api/public/stripe-webhook.ts`: webhook Stripe.
-- `src/integrations/supabase/*`: clientes Supabase client/server y middleware auth.
-- `supabase/migrations/*`: cambios de base de datos.
+### Backend/API (TanStack Start)
+- Endpoints y server functions para:
+  - Forja de texto e imagen.
+  - Creación de sesión de checkout Stripe.
+  - Recepción y procesamiento de webhook público de Stripe.
 
-### Capacidades ya presentes
-
-1. **Identidad visual inmersiva** (narrativa/cinemática).
-2. **Forja de símbolos** (texto/imagen).
-3. **Flujo de pago Stripe** integrado.
-4. **Base Supabase** para autenticación y datos.
-5. **SEO técnico** con JSON-LD de `Organization` + `WebSite`.
-6. **Entrada de cuenta** con rutas `/login` y `/signup`.
+### Datos (Supabase)
+- Persistencia de órdenes y sigils.
+- Registro de eventos de webhook para deduplicación/idempotencia.
+- Ledger de ownership para desbloqueos simbólicos.
 
 ---
 
-## 3) Mapeo con tu blueprint SOT (gap analysis)
+## Arquitectura real del repositorio
 
-Tu blueprint describe una arquitectura tipo Next.js App Router + Prisma + serverless API por dominios (auth/economy/commerce/ai/payments/webhooks). El repo actual no está en ese stack exacto, pero **sí puede alcanzar los mismos objetivos funcionales** con dos caminos:
-
-### Camino A (recomendado corto plazo): mantener stack actual
-
-- Mantener **TanStack Start + Supabase**.
-- Implementar APIs por dominio en rutas server existentes.
-- Modelar economía/comercio/IA sobre Supabase PostgreSQL.
-- Agregar pgvector y búsquedas semánticas en la misma base.
-
-### Camino B (migración total): pasar a Next.js + Prisma
-
-- Replantear routing y server functions a `app/api/*`.
-- Mover capa de datos a Prisma (Postgres externo o Supabase Postgres).
-- Rehacer middleware/auth y despliegue Vercel orientado a App Router.
-
-**Conclusión técnica:** para velocidad de entrega y menor riesgo, conviene primero consolidar Camino A y solo migrar si hay requerimientos estrictos del ecosistema Next/App Router.
+- `src/routes/*`: rutas app + rutas API.
+- `src/lib/forge.functions.ts`: núcleo de forja (validación, antiabuso, candidatos IA/deterministas).
+- `src/lib/stripe.functions.ts`: creación de checkout session.
+- `src/routes/api/public/stripe-webhook.ts`: webhook Stripe firmado e idempotente.
+- `src/lib/security.ts`: rate-limit, sanitización SVG y limpieza de inputs.
+- `src/lib/observability.ts`: logs y métricas de aplicación.
+- `src/integrations/supabase/*`: cliente server/client y auth middleware.
 
 ---
 
-## 4) Diseño objetivo SOT (aterrizado a implementación)
+## Hardening aplicado
 
-## 4.1 Dominios del sistema
-
-1. **Identidad**
-   - Registro/login, perfiles, roles, wallet vinculada.
-2. **Economía**
-   - Ledger de recompensas, débitos, trazabilidad de transacciones.
-3. **Comercio**
-   - Catálogo, creadores, activos simbólicos premium, checkout.
-4. **IA contextual**
-   - Recomendación basada en contexto territorial/simbólico.
-5. **Pagos**
-   - Stripe intents/sessions + webhook firmado + conciliación.
-6. **Gobernanza**
-   - Reglas de acceso, auditoría, moderación de símbolos/contenido.
-
-## 4.2 Modelo de datos mínimo sugerido
-
-Incluso si no usas Prisma hoy, este esquema funcional debe existir (Supabase SQL o Prisma según camino):
-
-- `users`
-- `wallets`
-- `transactions`
-- `places`
-- `commerce`
-- `payment_intents`
-- `symbols`
-- `symbol_lineage`
-- `symbol_embeddings` (vector)
+- Verificación de firma de webhook Stripe.
+- Dedupe de eventos por `event.id`.
+- Rate limiting por IP/UA hash en flujos sensibles.
+- Sanitización de entradas de texto y SVG.
+- Validación estricta de payload con Zod.
+- Señales antifraude para bloqueo temprano.
 
 ---
 
-## 5) Open Symbolic Network (OSN) — propuesta de arquitectura
+## Riesgos detectados (pendientes de evolución)
 
-### 5.1 Capa de ingesta
-
-- Conectores de datasets abiertos (museos, archivos visuales, etnografía pública).
-- Scraping controlado con listas blancas, rate limits y respeto de licencias.
-- Pipeline de normalización:
-  - metadata
-  - taxonomía arquetípica
-  - trazabilidad de origen
-
-### 5.2 Capa de seguridad y sanitización
-
-- Sanitización SVG robusta (server-side first).
-- Eliminación de scripts/event handlers/URLs peligrosas.
-- Política CSP estricta y validación de MIME/firmas de archivo.
-- Moderación asistida por IA + revisión humana para casos sensibles.
-
-### 5.3 Capa semántica
-
-- Embeddings multimodales (OpenCLIP/SigLIP).
-- Almacenamiento vectorial con pgvector.
-- Búsqueda híbrida:
-  - léxica (BM25/ILIKE/trigram)
-  - semántica (vector similarity)
-  - filtros taxonómicos/arquetípicos
-
-### 5.4 Capa de generación simbólica
-
-- Forge pipeline multi-etapa:
-  1) intent parsing
-  2) retrieval simbólico
-  3) synthesis procedural
-  4) style conditioning
-  5) scoring (rareza, coherencia, originalidad)
-  6) postproceso + validaciones
-
-### 5.5 Capa experiencial
-
-- Símbolos reactivos (GLSL shaders).
-- Audio procedural reactivo.
-- Escenas 3D inmersivas (futuro: WebGPU/Three.js).
-- Modos de mutación y genealogía simbólica en tiempo real.
+1. **Rate-limit en memoria local**: no distribuido entre instancias.
+2. **Dependencia IA externa**: requiere timeout y fallback (ya existe fallback, se reforzó timeout).
+3. **Observabilidad basada en DB**: recomendable complementar con alerting/trace externo.
+4. **Gobernanza/moderación**: requiere flujo humano para casos críticos.
 
 ---
 
-## 6) Stripe en producción (hardening obligatorio)
+## Roadmap técnico recomendado
 
-Ya que indicas Stripe configurado + webhook secret registrado, los siguientes puntos son críticos para deploy seguro:
+1. **Seguridad productiva avanzada**
+   - Rate-limit distribuido (Redis/Upstash).
+   - Reglas WAF y listas dinámicas de IP reputacional.
 
-1. **Validación de firma webhook** (`Stripe-Signature`) con `constructEvent`.
-2. **Idempotencia** por `event.id` (tabla de eventos procesados).
-3. **Conciliación** de estado de pago vs orden interna.
-4. **No confiar en montos del cliente** (recalcular server-side).
-5. **Separar claves por entorno** (test/live) y rotación periódica.
+2. **Economía y gobernanza**
+   - Ledger contable doble entrada.
+   - Reglas de reconciliación de pagos y estados de órdenes.
 
----
+3. **IA simbólica operativa**
+   - Ranking de calidad de candidatos.
+   - Búsqueda semántica híbrida (pgvector + filtros de dominio).
 
-## 7) SEO estructurado (rich results)
-
-Se recomienda mantener y ampliar:
-
-- `Organization`
-- `WebSite` con `SearchAction`
-- opcional según contenido real: `Service`, `Product`, `FAQPage`, `BreadcrumbList`
-
-Buenas prácticas:
-
-- Una sola fuente de verdad por entidad.
-- URLs canónicas consistentes.
-- Open Graph/Twitter cards por página principal y módulos clave.
+4. **Escalamiento UX**
+   - Panel operacional con paginación server-side.
+   - Timeline de eventos con auditoría y export.
 
 ---
 
-## 8) Plan de ejecución (Vercel Ready)
-
-### Fase 1 — Stabilize (1–2 semanas)
-- Endurecer auth/login/signup.
-- Hardening Stripe webhook + auditoría.
-- Observabilidad básica (logs, trazas, errores).
-- README técnico + runbooks operativos.
-
-### Fase 2 — Economic Core (2–4 semanas)
-- Wallet + transaction ledger.
-- Endpoints economía/comercio.
-- Métricas de conversión y antifraude básico.
-
-### Fase 3 — Symbolic Intelligence (4–8 semanas)
-- Ingesta datasets + taxonomía.
-- Embeddings + pgvector + búsqueda híbrida.
-- Ranking de rarezas y genealogía simbólica.
-
-### Fase 4 — Immersive OS (8+ semanas)
-- Motor audiovisual reactivo.
-- Simbología viva procedural.
-- Experiencia 3D y modos de mutación avanzados.
-
----
-
-## 9) Variables de entorno sugeridas
+## Variables de entorno
 
 ```bash
-# Core
-NODE_ENV=production
-APP_URL=https://anubis-legions.lovablle.app
+SUPABASE_URL=
+SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 
-# Supabase
-SUPABASE_URL=...
-SUPABASE_PUBLISHABLE_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
 
-# Stripe
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_PRICE_ID=...
+LOVABLE_API_KEY=
 
-# Observability (opcional)
-SENTRY_DSN=...
-LOG_LEVEL=info
+RATE_LIMIT_WINDOW=60
+RATE_LIMIT_MAX=30
 ```
 
 ---
 
-## 10) Comandos de desarrollo
+## Desarrollo local
 
 ```bash
 npm install
 npm run dev
-npm run build
-npm run preview
 npm run lint
+npm run typecheck
+npm run build
 ```
 
 ---
 
-## 11) Riesgos y mitigaciones
+## Despliegue
 
-1. **Riesgo legal datasets/scraping**
-   - Mitigar con licencia explícita + registro de procedencia + takedown process.
-
-2. **Riesgo seguridad SVG/contenido activo**
-   - Sanitización en servidor + CSP + aislamiento de render.
-
-3. **Riesgo pagos/fraude**
-   - Firma webhook, idempotencia, reconciliación y límites transaccionales.
-
-4. **Riesgo escalado IA-costos**
-   - Colas de trabajo, caché semántica y tiering por plan de usuario.
+Este repo está preparado para despliegue en edge/serverless con el stack actual (TanStack Start + Cloudflare/Vite), y puede evolucionar a Vercel si se decide una migración estructural del framework.
 
 ---
 
-## 12) Estado final esperado (visión)
+## Visión
 
-Al completar el roadmap, la plataforma deja de ser un “generador visual” y se convierte en:
-
-- **Sistema Operativo Territorial** para identidad simbólica.
-- **Red abierta y trazable** de inteligencia simbólica.
-- **Motor económico + creativo** con gobernanza y despliegue global.
-
----
-
-## 13) Próximo paso recomendado
-
-Si quieres continuar en modo ejecución intensa, el siguiente sprint debería ser:
-
-1. **Hardening producción + seguridad bancaria (Stripe/Supabase).**
-2. **Implementación de ledger económico mínimo viable.**
-3. **Primera iteración de búsqueda semántica con pgvector.**
-
-Con eso queda la base real para escalar a federación y experiencia inmersiva de nueva generación.
+RDM Digital apunta a consolidarse como un **Sistema Operativo Territorial simbólico**: identidad + economía + experiencia + gobernanza, con seguridad y trazabilidad como requisitos de base.

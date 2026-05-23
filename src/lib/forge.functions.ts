@@ -29,12 +29,15 @@ async function generateAICandidates(prompt: string, count: number): Promise<stri
   if (!key) return [];
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 9000);
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${key}`,
         "Content-Type": "application/json",
       },
+      signal: controller.signal,
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
@@ -55,13 +58,14 @@ async function generateAICandidates(prompt: string, count: number): Promise<stri
         temperature: 0.95,
       }),
     });
+    clearTimeout(timeout);
 
     if (!res.ok) return [];
     const data = await res.json();
     const text: string = data.choices?.[0]?.message?.content ?? "";
     return text
       .split("\n")
-      .map((l) => l.replace(/^[\s\d.\-•⸸*]+/, "").trim())
+      .map((l) => l.replace(/^[\s\d.\-•⸸*]+/, "").replace(/[<>]/g, "").trim())
       .filter((l) => l.length > 3 && l.length < 140)
       .slice(0, count);
   } catch {
@@ -123,8 +127,8 @@ export const forgeText = createServerFn({ method: "POST" })
       recentAttempts: 0,
     });
     if (risk.blocked) {
-      await incrementMetric("abuse.blocked", 1, { flow: "forge-text" });
-      await logEvent("warn", "forge_text_blocked", { reasons: risk.reasons, score: risk.score });
+      await incrementMetric("abuse.blocked", 1, { flow: "forge-image" });
+      await logEvent("warn", "forge_image_blocked", { reasons: risk.reasons, score: risk.score });
       throw new Error("Solicitud bloqueada por controles antiabuso");
     }
     const amount = data.plan === "legion" ? 15000 : 3000; // centavos MXN

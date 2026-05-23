@@ -7,11 +7,17 @@
   "observability": {
     "enabled": true
   },
+
+  "observability": {
+    "enabled": true
+  },
+
   "vars": {
     "APP_ENV": "development",
     "RATE_LIMIT_MAX": "30",
     "RATE_LIMIT_WINDOW": "60"
   },
+
   "env": {
     "development": {
       "name": "symbol-forge-dev",
@@ -19,12 +25,14 @@
         "APP_ENV": "development"
       }
     },
+
     "staging": {
       "name": "symbol-forge-staging",
       "vars": {
         "APP_ENV": "staging"
       }
     },
+
     "production": {
       "name": "symbol-forge-prod",
       "vars": {

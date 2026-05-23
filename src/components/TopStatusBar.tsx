@@ -1,5 +1,6 @@
 "use client";
 
+import { Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 
 type AccessLevel = "GUEST" | "SYMBOL_FORGE";
@@ -90,6 +91,9 @@ export default function TopStatusBar({ accessLevel, currentModule }: Props) {
           <span className="hidden text-[10px] text-ash md:inline">
             {timestamp || "syncing_time…"}
           </span>
+          <span className="hidden text-ash md:inline">//</span>
+          <Link to="/login" className="text-terminal hover:text-bone">Login</Link>
+          <Link to="/signup" className="text-terminal hover:text-bone">Sign Up</Link>
         </div>
       </div>
     </div>

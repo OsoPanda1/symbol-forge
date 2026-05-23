@@ -2,12 +2,13 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import Stripe from "stripe";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { getRequestHost, getRequestHeader } from "@tanstack/react-start/server";
+import { getRequestHost, getRequestHeader, getRequest } from "@tanstack/react-start/server";
+import { assertRateLimit, makeRateLimitKey } from "@/lib/security";
 
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error("STRIPE_SECRET_KEY no configurado");
-  return new Stripe(key, { apiVersion: "2024-06-20" as any });
+  return new Stripe(key);
 }
 
 export const createCheckoutSession = createServerFn({ method: "POST" })
@@ -15,6 +16,8 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
     z.object({ orderId: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data }) => {
+    const request = getRequest();
+    if (request) assertRateLimit(makeRateLimitKey("checkout", request));
     const stripe = getStripe();
     const { data: order, error } = await supabaseAdmin
       .from("orders")

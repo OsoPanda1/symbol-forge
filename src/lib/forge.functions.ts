@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { STYLES } from "@/lib/aesthetics";
+import { assertRateLimit, cleanTextInput, makeRateLimitKey, sanitizeSvg } from "@/lib/security";
+import { getRequest } from "@tanstack/react-start/server";
 
 const INTENTS = ["memoria", "frontera", "legión", "sombra", "fuego", "nodo", "resistencia", "fractura", "umbral"];
 
@@ -106,8 +108,12 @@ export const forgeText = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
+    const request = getRequest();
+    if (request) assertRateLimit(makeRateLimitKey("forge-text", request));
+    const prompt = cleanTextInput(data.prompt);
+    const contact = cleanTextInput(data.contact);
     const amount = data.plan === "legion" ? 15000 : 3000; // centavos MXN
-    const hash = forgeHash(`${data.plan}|text|${data.prompt}|${Date.now()}`);
+    const hash = forgeHash(`${data.plan}|text|${prompt}|${Date.now()}`);
 
     const { data: order, error: orderErr } = await supabaseAdmin
       .from("orders")
@@ -115,8 +121,8 @@ export const forgeText = createServerFn({ method: "POST" })
         plan: data.plan,
         amount_mxn: amount,
         mode: "text",
-        prompt: data.prompt,
-        contact: data.contact,
+        prompt,
+        contact,
         hash,
       })
       .select()
@@ -124,7 +130,7 @@ export const forgeText = createServerFn({ method: "POST" })
 
     if (orderErr || !order) throw new Error(orderErr?.message ?? "No se pudo crear la orden");
 
-    const candidates = await buildCandidates(data.prompt, data.plan);
+    const candidates = await buildCandidates(prompt, data.plan);
 
     const { data: sigils, error: sigilsErr } = await supabaseAdmin
       .from("sigils")
@@ -155,6 +161,10 @@ function parseDataUrl(dataUrl: string): { mime: string; bytes: Uint8Array } {
   if (!ALLOWED_MIME.has(mime)) throw new Error(`Formato no permitido: ${mime}`);
   const buf = Buffer.from(m[2], "base64");
   if (buf.byteLength > MAX_BYTES) throw new Error("La imagen supera 4 MB");
+  if (mime === "image/svg+xml") {
+    const sanitized = sanitizeSvg(buf.toString("utf8"));
+    return { mime, bytes: new TextEncoder().encode(sanitized) };
+  }
   return { mime, bytes: new Uint8Array(buf) };
 }
 
@@ -171,10 +181,14 @@ export const forgeImage = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data }) => {
+    const request = getRequest();
+    if (request) assertRateLimit(makeRateLimitKey("forge-image", request));
+    const prompt = cleanTextInput(data.prompt);
+    const contact = cleanTextInput(data.contact);
     const { mime, bytes } = parseDataUrl(data.imageDataUrl);
     const ext = mime.split("/")[1].replace("+xml", "");
     const amount = data.plan === "legion" ? 15000 : 3000;
-    const hash = forgeHash(`${data.plan}|image|${data.prompt}|${Date.now()}`);
+    const hash = forgeHash(`${data.plan}|image|${prompt}|${Date.now()}`);
 
     // upload to private bucket
     const path = `${hash.toLowerCase()}/${Date.now()}.${ext}`;
@@ -189,8 +203,8 @@ export const forgeImage = createServerFn({ method: "POST" })
         plan: data.plan,
         amount_mxn: amount,
         mode: "image",
-        prompt: data.prompt,
-        contact: data.contact,
+        prompt,
+        contact,
         hash,
         image_path: path,
       })
@@ -199,7 +213,7 @@ export const forgeImage = createServerFn({ method: "POST" })
 
     if (orderErr || !order) throw new Error(orderErr?.message ?? "No se pudo crear la orden");
 
-    const candidates = await buildCandidates(data.prompt, data.plan);
+    const candidates = await buildCandidates(prompt, data.plan);
 
     const { data: sigils, error: sigilsErr } = await supabaseAdmin
       .from("sigils")
@@ -224,6 +238,8 @@ export const selectSigil = createServerFn({ method: "POST" })
     z.object({ orderId: z.string().uuid(), sigilId: z.string().uuid() }).parse(input),
   )
   .handler(async ({ data }) => {
+    const request = getRequest();
+    if (request) assertRateLimit(makeRateLimitKey("select-sigil", request));
     const { error } = await supabaseAdmin
       .from("orders")
       .update({ selected_sigil_id: data.sigilId })
@@ -236,6 +252,8 @@ export const selectSigil = createServerFn({ method: "POST" })
 export const getOrderStatus = createServerFn({ method: "GET" })
   .inputValidator((input) => z.object({ orderId: z.string().uuid() }).parse(input))
   .handler(async ({ data }) => {
+    const request = getRequest();
+    if (request) assertRateLimit(makeRateLimitKey("order-status", request));
     const { data: order } = await supabaseAdmin
       .from("orders")
       .select("id, status, selected_sigil_id, plan, hash")

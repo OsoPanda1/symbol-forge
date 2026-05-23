@@ -5,7 +5,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error("STRIPE_SECRET_KEY no configurado");
-  return new Stripe(key, { apiVersion: "2024-06-20" as any });
+  return new Stripe(key);
 }
 
 export const Route = createFileRoute("/api/public/stripe-webhook")({

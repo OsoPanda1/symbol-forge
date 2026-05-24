@@ -1,12 +1,13 @@
 // src/components/Hero.tsx
 import OptimizedVideo from "@/components/OptimizedVideo";
 import heroBg from "@/assets/100493-656497720_medium.mp4";
+import profileSigil from "@/assets/ChatGPT Image 23 may 2026, 04_44_17 a.m..png";
 
 type Props = { onStartFree: () => void; onStartAlpha: () => void };
 
 export default function Hero({ onStartFree, onStartAlpha }: Props) {
   return (
-    <section className="relative z-10 px-4 pt-20 pb-24 md:pt-28 md:pb-32">
+    <section id="hero" className="relative z-10 px-4 pt-20 pb-24 md:pt-28 md:pb-32">
       {/* Capa de video específica del Hero (brecha principal) */}
       <OptimizedVideo
         src={heroBg}
@@ -120,6 +121,10 @@ export default function Hero({ onStartFree, onStartAlpha }: Props) {
                     Autorizado para generar símbolos fuera del ecosistema corporativo.
                   </span>
                 </p>
+              </div>
+
+              <div className="mt-4 overflow-hidden rounded border border-blood/30 bg-black/50">
+                <img src={profileSigil} alt="Sigilo visual principal" className="h-32 w-full object-cover opacity-75" loading="lazy" />
               </div>
 
               {/* Badge de acceso */}

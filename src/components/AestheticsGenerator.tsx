@@ -3,6 +3,7 @@
 
 import { useMemo, useState } from "react";
 import { generateAll } from "@/lib/aesthetics";
+import { buildIdentitySigil, SYMBOL_ATLAS } from "@/lib/symbol-atlas";
 import OptimizedVideo from "@/components/OptimizedVideo";
 import aestheticsBg from "@/assets/246877_medium.mp4";
 import forgeSeal from "@/assets/ChatGPT Image 23 may 2026, 05_11_38 a.m..png";
@@ -16,6 +17,7 @@ export default function AestheticsGenerator({ initialText = "anubis villaseñor"
   const [copied, setCopied] = useState<string | null>(null);
 
   const results = useMemo(() => generateAll(text), [text]);
+  const identitySigil = useMemo(() => buildIdentitySigil(text), [text]);
 
   const copy = async (out: string, id: string) => {
     if (!out) return;
@@ -143,6 +145,26 @@ export default function AestheticsGenerator({ initialText = "anubis villaseñor"
                   segmento.
                 </span>
               </p>
+            </div>
+          </div>
+        </div>
+
+
+        <div className="mt-8 grid gap-4 md:grid-cols-[1.3fr_2fr]">
+          <div className="panel p-4">
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-ash">// identidad_sugerida</div>
+            <div className="mt-3 break-words font-mono text-xl text-bone">{identitySigil || "[ sin semilla ]"}</div>
+            <p className="mt-2 font-mono text-[11px] text-muted-foreground">Generación determinista para alias social / gamer con símbolos especiales listos para copiar.</p>
+          </div>
+          <div className="panel p-4">
+            <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-ash">// atlas_de_símbolos</div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {SYMBOL_ATLAS.map((group) => (
+                <div key={group.id} className="rounded border border-border/60 bg-black/40 px-2 py-2">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-terminal">{group.label}</div>
+                  <div className="mt-1 break-words font-mono text-sm text-bone">{group.symbols.join(" ")}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

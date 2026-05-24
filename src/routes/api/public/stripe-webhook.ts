@@ -1,5 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Stripe from "stripe";
+import { requireEnv } from "@/lib/env";
+import { captureError, logEvent } from "@/lib/observability";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
+
 import { env } from "@/lib/env";
 import { captureError, logEvent } from "@/lib/observability";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
@@ -17,8 +21,21 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
           return new Response("Missing stripe signature", { status: 400 });
         }
 
+
+        let stripe: Stripe;
+        let stripeWebhookSecret: string;
+        try {
+          const required = requireEnv(["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"]);
+          stripe = new Stripe(required.STRIPE_SECRET_KEY);
+          stripeWebhookSecret = required.STRIPE_WEBHOOK_SECRET;
+        } catch (error) {
+          await captureError(error, { module: "stripe_webhook", stage: "env_validation" });
+          return new Response("Server misconfiguration: missing Stripe env", { status: 503 });
+        }
+
         let event: Stripe.Event;
         try {
+          event = await stripe.webhooks.constructEventAsync(rawBody, sig, stripeWebhookSecret);
           event = await stripe.webhooks.constructEventAsync(rawBody, sig, env.STRIPE_WEBHOOK_SECRET);
         } catch (error) {
           await captureError(error, { module: "stripe_webhook", stage: "signature_validation" });

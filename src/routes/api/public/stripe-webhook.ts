@@ -1,32 +1,42 @@
 import { createFileRoute } from "@tanstack/react-router";
 import Stripe from "stripe";
+import { env } from "@/lib/env";
+import { captureError, logEvent } from "@/lib/observability";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error("STRIPE_SECRET_KEY no configurado");
-  return new Stripe(key);
-}
+const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 
 export const Route = createFileRoute("/api/public/stripe-webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const stripe = getStripe();
         const sig = request.headers.get("stripe-signature");
-        const whSecret = process.env.STRIPE_WEBHOOK_SECRET;
         const rawBody = await request.text();
 
-        if (!sig || !whSecret) {
-          return new Response("Missing signature or secret", { status: 400 });
+        if (!sig) {
+          return new Response("Missing stripe signature", { status: 400 });
         }
 
         let event: Stripe.Event;
         try {
-          event = await stripe.webhooks.constructEventAsync(rawBody, sig, whSecret);
-        } catch (err) {
-          console.error("[stripe-webhook] invalid signature", err);
+          event = await stripe.webhooks.constructEventAsync(rawBody, sig, env.STRIPE_WEBHOOK_SECRET);
+        } catch (error) {
+          await captureError(error, { module: "stripe_webhook", stage: "signature_validation" });
           return new Response("Invalid signature", { status: 400 });
+        }
+
+        const { error: dedupeError } = await (supabaseAdmin as any)
+          .from("webhook_events")
+          .insert({ id: event.id, type: event.type });
+
+        if (dedupeError && String(dedupeError.message || "").toLowerCase().includes("duplicate")) {
+          await logEvent("info", "stripe_webhook_duplicate", { eventId: event.id, type: event.type });
+          return new Response(JSON.stringify({ received: true, duplicate: true }), { status: 200 });
+        }
+
+        if (dedupeError) {
+          await captureError(dedupeError, { module: "stripe_webhook", stage: "dedupe_insert", eventId: event.id });
+          return new Response("Webhook persistence error", { status: 500 });
         }
 
         try {
@@ -34,12 +44,12 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
             const session = event.data.object as Stripe.Checkout.Session;
             const orderId = session.metadata?.order_id;
             if (orderId) {
-              await supabaseAdmin
+              await (supabaseAdmin as any)
                 .from("orders")
                 .update({ status: "paid", paid_at: new Date().toISOString() })
                 .eq("id", orderId);
 
-              await supabaseAdmin
+              await (supabaseAdmin as any)
                 .from("sigils")
                 .update({ released: true })
                 .eq("order_id", orderId);
@@ -48,14 +58,13 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
             const session = event.data.object as Stripe.Checkout.Session;
             const orderId = session.metadata?.order_id;
             if (orderId) {
-              await supabaseAdmin
-                .from("orders")
-                .update({ status: "expired" })
-                .eq("id", orderId);
+              await (supabaseAdmin as any).from("orders").update({ status: "expired" }).eq("id", orderId);
             }
           }
-        } catch (err) {
-          console.error("[stripe-webhook] processing error", err);
+
+          await logEvent("info", "stripe_event_processed", { eventId: event.id, type: event.type });
+        } catch (error) {
+          await captureError(error, { module: "stripe_webhook", stage: "processing", eventId: event.id, type: event.type });
           return new Response("Processing error", { status: 500 });
         }
 

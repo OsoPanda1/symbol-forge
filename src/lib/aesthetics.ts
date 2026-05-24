@@ -149,7 +149,9 @@ export const STYLES: Style[] = [
     id: "runes",
     label: "Sigilo Rúnico",
     tag: "GLYPH.RUNIC",
-    transform: (t) => `ᚱ ${apply(t, boldU, bold).split("").join("·")} ᚱ`,
+    // IMPORTANT: spread by code points — `.split("")` shatters surrogate pairs
+    // of mathematical bold chars and triggers SSR/CSR hydration mismatch.
+    transform: (t) => `ᚱ ${[...apply(t, boldU, bold)].join("·")} ᚱ`,
   },
   {
     id: "tribal",

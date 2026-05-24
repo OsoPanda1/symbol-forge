@@ -77,7 +77,16 @@ export type Style = {
   transform: (text: string) => string;
 };
 
+const sovereignMap = buildMap(A, "λβ¢đεƒğħįʝκℓɱŋøρզřşŧµνωжყž");
+const sovereignUpperMap = buildMap(U, "Λß₵ÐΞƑǤĦĮJҠŁΜŊØƤǪŘŞŦɄƲŴЖ¥Ȥ");
+
 export const STYLES: Style[] = [
+  {
+    id: "anubis-sovereign",
+    label: "Alfabeto Soberano",
+    tag: "ANUBIS.IDENTITY",
+    transform: (t) => `𓂀⟁ ${apply(t, sovereignUpperMap, sovereignMap, dblD)} ⟁𓂀`,
+  },
   {
     id: "fraktur-bold",
     label: "Fraktur Sangre",

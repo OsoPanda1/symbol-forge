@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { generateAll } from "@/lib/aesthetics";
 import OptimizedVideo from "@/components/OptimizedVideo";
 import aestheticsBg from "@/assets/246877_medium.mp4";
+import forgeSeal from "@/assets/ChatGPT Image 23 may 2026, 05_11_38 a.m..png";
 
 type Props = {
   initialText?: string;
@@ -122,6 +123,10 @@ export default function AestheticsGenerator({ initialText = "anubis villaseñor"
                 <span>// lectura.del.núcleo</span>
                 <span className="text-terminal">estado: estable</span>
               </div>
+              <div className="mt-4 overflow-hidden rounded border border-border/60 bg-black/60">
+                <img src={forgeSeal} alt="Sello visual de forja" className="h-28 w-full object-cover opacity-80" loading="lazy" />
+              </div>
+
               <p className="mt-3 font-mono text-[11px] leading-relaxed text-muted-foreground">
                 Cada variante que ves abajo es una posible cara de tu identidad digital. Úsalas como
                 alias, firmas, separadores, headers de documentos o marcadores de territorio en

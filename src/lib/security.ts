@@ -81,10 +81,18 @@ export function cleanTextInput(value: string): string {
 }
 
 export function sanitizeSvg(svg: string): string {
-  return svg
-    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
-    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
-    .replace(/\s(?:href|xlink:href)\s*=\s*("|')\s*javascript:[\s\S]*?\1/gi, "");
+  // Real sanitization via DOMPurify (no regex). Blocks scripts, event handlers,
+  // foreignObject, javascript: URLs, external refs, and unsafe namespaces.
+  // Synchronous require keeps this server-safe in TanStack server functions.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const DOMPurify = require("isomorphic-dompurify");
+  return DOMPurify.sanitize(svg, {
+    USE_PROFILES: { svg: true, svgFilters: true },
+    FORBID_TAGS: ["script", "foreignObject", "iframe", "object", "embed", "audio", "video", "a"],
+    FORBID_ATTR: ["onload", "onerror", "onclick", "onmouseover", "href", "xlink:href", "formaction", "action"],
+    ADD_URI_SAFE_ATTR: [],
+    KEEP_CONTENT: false,
+  });
 }
 
 export async function getUserEmailFromRequest(request: Request | undefined): Promise<string | null> {

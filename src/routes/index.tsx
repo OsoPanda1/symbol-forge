@@ -9,6 +9,7 @@ import LogsConsole from "@/components/LogsConsole";
 import Footer from "@/components/Footer";
 import CinematicIntro from "@/components/CinematicIntro";
 import AuthPanel from "@/components/AuthPanel";
+import AmbientAudio from "@/components/AmbientAudio";
 
 
 export const Route = createFileRoute("/")({
@@ -59,6 +60,7 @@ function Index() {
       </div>
 
       <LogsConsole />
+      <AmbientAudio />
     </div>
   );
 }

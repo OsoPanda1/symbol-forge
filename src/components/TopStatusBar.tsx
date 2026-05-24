@@ -94,6 +94,7 @@ export default function TopStatusBar({ accessLevel, currentModule }: Props) {
           <span className="hidden text-ash md:inline">//</span>
           <Link to="/login" className="text-terminal hover:text-bone">Login</Link>
           <Link to="/signup" className="text-terminal hover:text-bone">Sign Up</Link>
+          <Link to="/profile" className="text-terminal hover:text-bone">Perfil</Link>
         </div>
       </div>
     </div>

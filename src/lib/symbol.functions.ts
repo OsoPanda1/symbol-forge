@@ -17,7 +17,7 @@ export const renderSymbolAccess = createServerFn({ method: "POST" })
     const userEmail = await getUserEmailFromRequest(request);
     if (!userEmail) return { status: "locked" };
 
-    const { data: symbol } = await supabaseAdmin
+    const { data: symbol } = await (supabaseAdmin as any)
       .from("symbols")
       .select("id, pua_hex")
       .eq("sigil_id", data.sigilId)
@@ -26,7 +26,7 @@ export const renderSymbolAccess = createServerFn({ method: "POST" })
 
     if (!symbol) return { status: "locked" };
 
-    const { data: unlocked } = await supabaseAdmin
+    const { data: unlocked } = await (supabaseAdmin as any)
       .from("user_unlocks")
       .select("symbol_id")
       .eq("symbol_id", symbol.id)

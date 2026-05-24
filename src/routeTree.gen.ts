@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LandingRouteImport } from './routes/landing'
 import { Route as IndexRouteImport } from './routes/index'
@@ -20,6 +21,11 @@ import { Route as ApiPublicFeaturesTreeRouteImport } from './routes/api/public/f
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/signup': typeof SignupRoute
   '/forge/success': typeof ForgeSuccessRoute
   '/api/public/features-tree': typeof ApiPublicFeaturesTreeRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/signup': typeof SignupRoute
   '/forge/success': typeof ForgeSuccessRoute
   '/api/public/features-tree': typeof ApiPublicFeaturesTreeRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/landing': typeof LandingRoute
   '/login': typeof LoginRoute
+  '/profile': typeof ProfileRoute
   '/signup': typeof SignupRoute
   '/forge/success': typeof ForgeSuccessRoute
   '/api/public/features-tree': typeof ApiPublicFeaturesTreeRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/landing'
     | '/login'
+    | '/profile'
     | '/signup'
     | '/forge/success'
     | '/api/public/features-tree'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/landing'
     | '/login'
+    | '/profile'
     | '/signup'
     | '/forge/success'
     | '/api/public/features-tree'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/landing'
     | '/login'
+    | '/profile'
     | '/signup'
     | '/forge/success'
     | '/api/public/features-tree'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LandingRoute: typeof LandingRoute
   LoginRoute: typeof LoginRoute
+  ProfileRoute: typeof ProfileRoute
   SignupRoute: typeof SignupRoute
   ForgeSuccessRoute: typeof ForgeSuccessRoute
   ApiPublicFeaturesTreeRoute: typeof ApiPublicFeaturesTreeRoute
@@ -128,6 +141,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LandingRoute: LandingRoute,
   LoginRoute: LoginRoute,
+  ProfileRoute: ProfileRoute,
   SignupRoute: SignupRoute,
   ForgeSuccessRoute: ForgeSuccessRoute,
   ApiPublicFeaturesTreeRoute: ApiPublicFeaturesTreeRoute,
@@ -187,13 +208,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -42,7 +42,7 @@ export const getMyHistory = createServerFn({ method: "POST" })
     let q = supabaseAdmin
       .from("orders")
       .select("id, plan, amount_mxn, status, mode, prompt, created_at, paid_at", { count: "exact" })
-      .eq("contact", email.toLowerCase())
+      .ilike("contact", email)
       .order("created_at", { ascending: false });
 
     if (data.plan !== "all") q = q.eq("plan", data.plan);

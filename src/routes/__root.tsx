@@ -125,6 +125,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@TAMV_Online" },
+      { name: "twitter:title", content: "Symbol Forge · The Alpha Red Hat" },
+      { name: "description", content: "Symbol Forge is a unique application for creating and selling custom digital symbols and fonts." },
+      { property: "og:description", content: "Symbol Forge is a unique application for creating and selling custom digital symbols and fonts." },
+      { name: "twitter:description", content: "Symbol Forge is a unique application for creating and selling custom digital symbols and fonts." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/98a608a9-4d7e-42ff-bd77-37e31cb46a57/id-preview-dc1fd3a3--f3e5aca8-3365-456b-92a6-1217bc284383.lovable.app-1779597239232.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/98a608a9-4d7e-42ff-bd77-37e31cb46a57/id-preview-dc1fd3a3--f3e5aca8-3365-456b-92a6-1217bc284383.lovable.app-1779597239232.png" },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

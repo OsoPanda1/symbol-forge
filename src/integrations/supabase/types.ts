@@ -14,31 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-
-      collections: {
-        Row: {
-          created_at: string
-          id: number
-          is_public: boolean
-          name: string
-          price: number
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          is_public?: boolean
-          name: string
-          price?: number
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          is_public?: boolean
-          name?: string
-          price?: number
-        }
-        Relationships: []
-      }
       orders: {
         Row: {
           amount_mxn: number
@@ -84,99 +59,6 @@ export type Database = {
           selected_sigil_id?: string | null
           status?: string
           stripe_session_id?: string | null
-        }
-        Relationships: []
-      }
-
-      symbols: {
-        Row: {
-          collection_id: number | null
-          created_at: string
-          id: number
-          is_active: boolean
-          pua_hex: string
-          sigil_id: string | null
-          svg_path_data: string | null
-          symbol_name: string
-        }
-        Insert: {
-          collection_id?: number | null
-          created_at?: string
-          id?: number
-          is_active?: boolean
-          pua_hex: string
-          sigil_id?: string | null
-          svg_path_data?: string | null
-          symbol_name: string
-        }
-        Update: {
-          collection_id?: number | null
-          created_at?: string
-          id?: number
-          is_active?: boolean
-          pua_hex?: string
-          sigil_id?: string | null
-          svg_path_data?: string | null
-          symbol_name?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "symbols_collection_id_fkey"
-            columns: ["collection_id"]
-            isOneToOne: false
-            referencedRelation: "collections"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "symbols_sigil_id_fkey"
-            columns: ["sigil_id"]
-            isOneToOne: true
-            referencedRelation: "sigils"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      user_unlocks: {
-        Row: {
-          symbol_id: number
-          unlocked_at: string
-          user_key: string
-        }
-        Insert: {
-          symbol_id: number
-          unlocked_at?: string
-          user_key: string
-        }
-        Update: {
-          symbol_id?: number
-          unlocked_at?: string
-          user_key?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_unlocks_symbol_id_fkey"
-            columns: ["symbol_id"]
-            isOneToOne: false
-            referencedRelation: "symbols"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      webhook_events: {
-        Row: {
-          id: string
-          received_at: string
-          type: string
-        }
-        Insert: {
-          id: string
-          received_at?: string
-          type: string
-        }
-        Update: {
-          id?: string
-          received_at?: string
-          type?: string
         }
         Relationships: []
       }

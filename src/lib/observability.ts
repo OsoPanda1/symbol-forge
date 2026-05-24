@@ -32,3 +32,12 @@ export async function incrementMetric(name: string, value = 1, dimensions: Recor
     console.error("[observability] metric insert failed", error);
   }
 }
+
+
+export async function captureError(error: unknown, context: Record<string, unknown> = {}) {
+  await logEvent("error", "captured_error", {
+    message: error instanceof Error ? error.message : String(error),
+    stack: error instanceof Error ? error.stack : undefined,
+    ...context,
+  });
+}
